@@ -1,4 +1,14 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #4AA8E2; /* Azul Claro - Header, Botones */
+  --color-secondary: #005F9E; /* Azul Oscuro - Elementos secundarios, texto clave */
+  --color-accent: #D72F8B; /* Rosa/Fucsia - Resaltar acciones importantes */
+  --color-white: #FFFFFF; /* Blanco - Fondos y limpieza visual */
+  --color-gray-light: #F5F5F5; /* Gris Claro - Fondos secundarios, bordes */
+}
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
