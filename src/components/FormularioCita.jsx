@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import api from '../services/api'; // Importamos el cliente Axios configurado
 
 const FormularioCita = () => {
@@ -19,33 +20,38 @@ const FormularioCita = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
+        if (!pacienteId || !fechaHora || (tipoCita === 'OTRO' && !otroTipoCita)) {
+            toast.error("⚠️ Todos los campos son obligatorios.");
+            return;
+        }
+    
         const citaData = {
             idPaciente: parseInt(pacienteId, 10),
             idDoctor: odontologoId,
             fechaHora: fechaHora,
             estado: "PENDIENTE",
-            tipoCita: tipoCita 
+            tipoCita: tipoCita === "OTRO" ? otroTipoCita.toUpperCase() : tipoCita
         };
-
+    
+        const toastId = toast.loading("⏳ Agendando cita..."); // Guardamos el ID del toast de carga
+    
         try {
-            const response = await api.post("/citas/crear", citaData); // Usamos `api.js`
-            console.log("Cita creada con éxito:", response.data);
-            alert("✅ Cita agendada con éxito");
-
+            const response = await api.post("/citas/crear", citaData);
+            toast.dismiss(toastId); 
+            toast.success("Cita creada con éxito!");
+    
             // Limpiar el formulario después del envío exitoso
             setPacienteId('');
             setFechaHora('');
             setTipoCita('CONSULTA_GENERAL');
             setOtroTipoCita('');
-            console.log("CitaData:", citaData);
         } catch (error) {
-            console.error("❌ Error al agendar la cita", error);
-            console.log("CitaData:", citaData);
-            alert("❌ Error al agendar la cita. Inténtalo de nuevo.");
+            toast.dismiss(toastId); 
+            toast.error("Error al agendar la cita. Inténtalo de nuevo.");
         }
     };
-
+    
     return (
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-4 bg-white shadow-md rounded">
             <h2 className="text-xl font-bold mb-4">🦷 Agendar Cita Odontológica</h2>
@@ -92,7 +98,7 @@ const FormularioCita = () => {
                     <option value="TRATAMIENTO_DE_CONDUCTO">Tratamiento de Conducto</option>
                     <option value="ORTODONCIA">Ortodoncia (Brackets)</option>
                     <option value="IMPLANTES_DENTALES">Implantes Dentales</option>
-                    <option value="BLANQUEAMIENTO_DENTAL">Blanqueamiento Dental</option> {/* Corregido aquí */}
+                    <option value="BLANQUEAMIENTO_DENTAL">Blanqueamiento Dental</option>
                     <option value="OTRO">Otro</option>
                 </select>
             </div>
@@ -113,7 +119,7 @@ const FormularioCita = () => {
             )}
 
             {/* Botón de enviar */}
-            <button type="submit" className=" bg-primary  hover:bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                 Agendar Cita
             </button>
         </form>
