@@ -1,10 +1,12 @@
-export default function Header()  {
+export default function Header() {
     return (
-        <header className="bg-gradient-to-r from-[var(--color-primary)] from-10%
-        via-[var(--color-secondary)] via-50% to-[var(--color-accent)] to-100% p-12">
-            <h1 className="font-sans text-3xl font-bold">Bienvenido al Sistema de Gestión Dental</h1>
-            {/*Texto probicional*/}
+        <header className="bg-secondary">
+            <nav className=" text-white py-5">
+                <ul className="flex justify-center text-2xl space-x-8">
+                    <li><a href="#" className="hover:text-accent">Home</a></li>
+                    <li><a href="/citas" className="hover:text-accent">Citas</a></li>
+                </ul>
+            </nav>
         </header>
     );
-};
-
+}
