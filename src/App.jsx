@@ -4,6 +4,8 @@ import Home from './pages/Home'
 import Citas from './pages/citas'
 import Login from './pages/login'
 import Registro from './pages/registro';
+import RecuperarContraseña from './pages/recuperarContraseña';
+import CambiarContraseña from './pages/cambiarContraseña';
 import { Toaster } from 'react-hot-toast';
 
 
@@ -21,6 +23,8 @@ function App() {
       <Route path="/citas" element={<Citas />} />
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
+      <Route path="/recuperarContraseña" element={<RecuperarContraseña />} />
+      <Route path="/cambiarContraseña" element={<CambiarContraseña />} />
     </Routes>
     </Router>
 

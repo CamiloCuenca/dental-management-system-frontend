@@ -32,7 +32,7 @@ const FormularioLogin = () => {
 
                         <div className="flex gap-1 items-center">
                             <p className="font-semibold">
-                            <a href="/#" 
+                            <a href="/recuperarContraseña" 
                             className="text-[var(--color-secondary)] hover:underline text-sm">
                             Olvidé mi contraseña</a></p>
                         </div>
