@@ -8,7 +8,7 @@ export default function Header() {
         <header className="bg-secondary">
             <nav className="text-white py-5 px-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold">Corpodent</h1>
+                    <h1 className="text-3xl font-bold">OdontoLogic</h1>
                     
                     {/* Botón del menú hamburguesa */}
                     <button 
@@ -21,10 +21,10 @@ export default function Header() {
 
                 {/* Menú de navegación */}
                 <ul className={`md:flex md:justify-center md:space-x-8 text-2xl mt-5 md:mt-0 transition-all duration-300 ${isOpen ? 'block' : 'hidden'} md:block`}>
-                    <li><a href="#" className="block py-2 md:inline hover:text-accent">Home</a></li>
-                    <li><a href="/citas" className="block py-2 md:inline hover:text-accent">Citas</a></li>
-                    <li><a href="/login" className="block py-2 md:inline hover:text-accent">Iniciar sesión</a></li>
-                    <li><a href="/registro" className="block py-2 md:inline hover:text-accent">Registro</a></li>
+                    <li><a href="#" className="block  md:inline hover:text-accent">Home</a></li>
+                    <li><a href="/citas" className="block  md:inline hover:text-accent">Citas</a></li>
+                    <li><a href="/login" className="block  md:inline hover:text-accent">Iniciar sesión</a></li>
+                    <li><a href="/registro" className="block  md:inline hover:text-accent">Registro</a></li>
                 </ul>
             </nav>
         </header>

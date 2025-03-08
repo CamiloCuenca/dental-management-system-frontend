@@ -10,10 +10,10 @@ export default function Header() {
                         Información de contacto
                     </h2>
                     <ul>
-                        <li className="text-[var(--color-gray-light)]"> <b>Dirección 1:</b> Cra. 14 #9 Norte 71, Armenia </li>
-                        <li className="text-[var(--color-gray-light)]"> <b>Dirección 2:</b> Calle 50 No 22-00 Inter Plaza Feria de los Plátanos Local 7-8, Armenia </li>
-                        <li className="text-[var(--color-gray-light)]"> <b>Teléfono:</b> (606) 7339895 - 316 6907332</li>
-                        <li className="text-[var(--color-gray-light)]"> <b>Correo:</b> info@corpodent.com</li>
+                        <li className="text-[var(--color-gray-light)]"> <b>Dirección 1:</b> Cra. 123 #98, Armenia </li>
+                        <li className="text-[var(--color-gray-light)]"> <b>Dirección 2:</b> Cra.987 #36, Armenia </li>
+                        <li className="text-[var(--color-gray-light)]"> <b>Teléfono:</b> (606) 7123456 - 300 1234567 </li>
+                        <li className="text-[var(--color-gray-light)]"> <b>Correo:</b> odontologic@info.com</li>
                     </ul>
                 </div>
                 <div>
@@ -36,19 +36,19 @@ export default function Header() {
                         <li>
                             {" "}
                             <FaFacebook className=" text-blue-900" /> {" "}
-                            <a href="https://www.facebook.com/clinica.corpodent/?locale=es_LA" className="hoover:underline text-[var(--color-gray-light)]"> Facebook</a>
+                            <a href="https://www.facebook.com" className="hoover:underline text-[var(--color-gray-light)]"> Facebook</a>
                         </li>
 
                         <li>
                             {" "}
                             <FaTwitter className=" text-blue-400" /> {" "}
-                            <a href="https://x.com/Corpodent" className="hoover:underline text-[var(--color-gray-light)]"> Twitter</a>
+                            <a href="https://x.com" className="hoover:underline text-[var(--color-gray-light)]"> Twitter</a>
                         </li>
 
                         <li>
                             {" "}
                             <FaInstagram className=" text-orange-500" /> {" "}
-                            <a href="https://www.instagram.com/clinicacorpodent.odontologia/" className="hoover:underline text-[var(--color-gray-light)]"> Intagram</a>
+                            <a href="https://www.instagram.com" className="hoover:underline text-[var(--color-gray-light)]"> Intagram</a>
                         </li>
 
                     </ul>
