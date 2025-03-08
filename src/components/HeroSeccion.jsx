@@ -3,7 +3,7 @@ import React from 'react';
 const HeroSeccion = () => {
     return (
         <div className="bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] 
-                        h-[350px] md:h-[450px] flex items-center px-6 md:px-12">
+                        h-[350px] md:h-[450px] flex items-center px-6 md:px-12 py-60">
 
             {/* Imagen oculta en pantallas pequeñas, visible en mayores */}
             <div className="hidden sm:block w-[30%] md:w-[25%] lg:w-[33.5%] flex justify-start ml-[-20px]">
