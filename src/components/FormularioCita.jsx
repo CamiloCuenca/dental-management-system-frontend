@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import api from '../services/api'; // Importamos el cliente Axios configurado
+import api from '../services/api'; // Cliente Axios configurado
 
 const FormularioCita = () => {
     const [pacienteId, setPacienteId] = useState('');
-    const [fechaHora, setFechaHora] = useState('');
     const [tipoCita, setTipoCita] = useState('CONSULTA_GENERAL');
     const [otroTipoCita, setOtroTipoCita] = useState('');
-
-    // ID del odontólogo (quemado por ahora)
-    const odontologoId = 123456789;
 
     const handleTipoCitaChange = (e) => {
         setTipoCita(e.target.value);
@@ -21,34 +17,31 @@ const FormularioCita = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
     
-        if (!pacienteId || !fechaHora || (tipoCita === 'OTRO' && !otroTipoCita)) {
+        if (!pacienteId || (tipoCita === 'OTRO' && !otroTipoCita)) {
             toast.error("⚠️ Todos los campos son obligatorios.");
             return;
         }
     
         const citaData = {
             idPaciente: parseInt(pacienteId, 10),
-            idDoctor: odontologoId,
-            fechaHora: fechaHora,
             estado: "PENDIENTE",
             tipoCita: tipoCita === "OTRO" ? otroTipoCita.toUpperCase() : tipoCita
         };
     
-        const toastId = toast.loading("⏳ Agendando cita..."); // Guardamos el ID del toast de carga
+        const toastId = toast.loading("⏳ Agendando cita...");
     
         try {
-            const response = await api.post("/citas/crear", citaData);
-            toast.dismiss(toastId); 
-            toast.success("Cita creada con éxito!");
+            await api.post("/citas/crear", citaData);
+            toast.dismiss(toastId);
+            toast.success("✅ Cita creada con éxito!");
     
             // Limpiar el formulario después del envío exitoso
             setPacienteId('');
-            setFechaHora('');
             setTipoCita('CONSULTA_GENERAL');
             setOtroTipoCita('');
         } catch (error) {
-            toast.dismiss(toastId); 
-            toast.error("Error al agendar la cita. Inténtalo de nuevo.");
+            toast.dismiss(toastId);
+            toast.error("❌ Error al agendar la cita. Inténtalo de nuevo.");
         }
     };
     
@@ -58,25 +51,14 @@ const FormularioCita = () => {
 
             {/* ID del paciente */}
             <div className="mb-4">
-                <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="pacienteId">Documento de identidad del paciente:</label>
+                <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="pacienteId">
+                    Documento de identidad del paciente:
+                </label>
                 <input
                     type="text"
                     id="pacienteId"
                     value={pacienteId}
                     onChange={(e) => setPacienteId(e.target.value)}
-                    required
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-            </div>
-
-            {/* Fecha y hora */}
-            <div className="mb-4">
-                <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="fechaHora">Fecha y hora de la cita:</label>
-                <input
-                    type="datetime-local"
-                    id="fechaHora"
-                    value={fechaHora}
-                    onChange={(e) => setFechaHora(e.target.value)}
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
@@ -106,7 +88,9 @@ const FormularioCita = () => {
             {/* Campo adicional si el usuario elige "Otro" */}
             {tipoCita === 'OTRO' && (
                 <div className="mb-4">
-                    <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="otroTipoCita">Especificar otro tipo de cita:</label>
+                    <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="otroTipoCita">
+                        Especificar otro tipo de cita:
+                    </label>
                     <input
                         type="text"
                         id="otroTipoCita"
