@@ -1,4 +1,5 @@
 import FormularioCita from "../components/FormularioCita";
+import TableCitas from "../components/TableCitas";
 
 
 export default function Citas(){
@@ -6,6 +7,7 @@ export default function Citas(){
         <div>
            
             <FormularioCita/>
+            <TableCitas/>
         </div>
     )
 }
