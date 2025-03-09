@@ -136,12 +136,14 @@ const FormularioRegistro = () => {
                 </div>
 
                 <div className="flex flex-col items-center mt-5">
+                    <a href="/activarCuenta">
                     <button
                         disabled={!formValido}
                         className={`px-4 sm:px-5 py-2 text-xl sm:text-2xl rounded-md text-white ${formValido ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
                     >
                         Registrarse
                     </button>
+                    </a>
                     <p className="font-semibold mt-4 text-sm sm:text-base">
                         ¿Ya tienes una cuenta?
                         <a href="/login" className="text-[var(--color-secondary)] hover:underline"> Iniciar sesión</a>
