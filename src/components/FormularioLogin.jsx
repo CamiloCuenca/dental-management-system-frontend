@@ -103,7 +103,8 @@ const FormularioLogin = () => {
                         </div>
                     </div>
 
-                    <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />
+                   {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
+                    <ReCAPTCHA sitekey='6LfZTu0qAAAAAO-EpbIWUAaX0L1KY31D5IOuuZhs' onChange={onChangeCaptcha}/> 
 
                     {mensajeError && <p className="text-red-500 text-sm">{mensajeError}</p>}
 
