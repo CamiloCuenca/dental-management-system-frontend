@@ -55,6 +55,7 @@ const FormularioCita = () => {
 
         try {
             await api.post("/citas/crear", citaData);
+            console.log("datos", citaData);
             toast.dismiss(toastId);
             toast.success("✅ Cita creada con éxito!");
 
@@ -82,7 +83,7 @@ const FormularioCita = () => {
                         id="pacienteId"
                         value={pacienteId}
                         onChange={(e) => setPacienteId(e.target.value)}
-                        disabled={!!pacienteId}
+                        disabled={false}
                         className="w-full p-2 border rounded-lg bg-gray-100 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
                     />
                 </div>
