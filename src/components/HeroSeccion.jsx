@@ -31,12 +31,7 @@ const HeroSeccion = () => {
                     >
                         Agenda una Cita
                     </a>
-                    <a 
-                        href="/consultas"
-                        className="px-5 py-2.5 bg-[var(--color-accent)] hover:bg-pink-600 text-white text-lg font-semibold rounded shadow-md transition duration-300"
-                    >
-                        Consulta tus citas
-                    </a>
+                    
                 </div>
             </div>
         </div>
