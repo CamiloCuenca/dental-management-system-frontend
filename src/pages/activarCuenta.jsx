@@ -1,11 +1,11 @@
 import FormularioActivarCuenta from "../components/FormularioActivarCuenta";
 
-
-export default function ActivarCuenta(){
-    return(
+// Componente que representa la página para activar una cuenta
+export default function ActivarCuenta() {
+    return (
         <div>
-           
-            <FormularioActivarCuenta/>
+            {/* Renderiza el formulario de activación de cuenta */}
+            <FormularioActivarCuenta />
         </div>
-    )
+    );
 }

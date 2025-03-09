@@ -1,35 +1,64 @@
 import { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
-import Swal from 'sweetalert2'; // Importar SweetAlert2
+import Swal from 'sweetalert2'; 
 import imagenLogin from '../assets/imagenLogin.png';
 import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; // Cliente Axios configurado
+import api from "../services/api"; 
 
+/**
+ * Componente de formulario para iniciar sesión en la plataforma.
+ *
+ * @component
+ * @example
+ * return (
+ *   <FormularioLogin />
+ * )
+ *
+ * @returns {JSX.Element} Formulario de inicio de sesión.
+ */
 const FormularioLogin = () => {
     const [captchaValido, setCaptchaValido] = useState(false);
     const [usuario, setUsuario] = useState('');
     const [contrasena, setContrasena] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [mensajeError, setMensajeError] = useState('');
-    const navigate = useNavigate(); // Hook para redirigir
+    const navigate = useNavigate(); 
 
+    /**
+     * Alterna la visibilidad de la contraseña.
+     */
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-    const onChangeCaptcha = (e) => {
-        setCaptchaValido(!!e);
+    /**
+     * Maneja el cambio en el CAPTCHA.
+     * @param {string} value - Valor del CAPTCHA.
+     */
+    const onChangeCaptcha = (value) => {
+        setCaptchaValido(!!value);
     };
 
+    /**
+     * Maneja el cambio en el campo de usuario.
+     * @param {React.ChangeEvent<HTMLInputElement>} e - Evento del input.
+     */
     const handleUsuarioChange = (e) => {
         setUsuario(e.target.value);
     };
 
+    /**
+     * Maneja el cambio en el campo de contraseña.
+     * @param {React.ChangeEvent<HTMLInputElement>} e - Evento del input.
+     */
     const handleContrasenaChange = (e) => {
         setContrasena(e.target.value);
     };
 
     const isButtonEnabled = usuario.trim() !== '' && contrasena.trim() !== '' && captchaValido;
 
+    /**
+     * Inicia sesión llamando a la API y guarda el token en la sesión.
+     */
     const login = async () => {
         if (!isButtonEnabled) return;
 
@@ -43,14 +72,14 @@ const FormularioLogin = () => {
 
             sessionStorage.setItem("token", response.data.token);
 
-            // Mostrar alerta de éxito con SweetAlert2
+            // Mostrar alerta de éxito
             Swal.fire({
                 title: "Inicio de sesión exitoso",
                 text: "Bienvenido a la plataforma",
                 icon: "success",
                 confirmButtonText: "Aceptar"
             }).then(() => {
-                navigate("/"); // Redirigir al home
+                navigate("/"); 
             });
 
         } catch (error) {
@@ -71,6 +100,7 @@ const FormularioLogin = () => {
 
                     <h1 className="text-5xl font-bold text-[var(--color-secondary)]">Bienvenido</h1>
 
+                    {/* Campo de Usuario */}
                     <div className="flex flex-col text-left gap-1 w-full">
                         <span className="text-lg">Usuario:</span>
                         <input
@@ -82,6 +112,7 @@ const FormularioLogin = () => {
                         />
                     </div>
 
+                    {/* Campo de Contraseña */}
                     <div className="flex flex-col text-left gap-1 w-full">
                         <span className="text-lg">Contraseña:</span>
                         <div className="relative w-full">
@@ -103,11 +134,14 @@ const FormularioLogin = () => {
                         </div>
                     </div>
 
-                   {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
-                        <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
+                    {/* CAPTCHA */}
+                    <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
+                    {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
 
+                    {/* Mensaje de error */}
                     {mensajeError && <p className="text-red-500 text-sm">{mensajeError}</p>}
 
+                    {/* Botón de Ingresar */}
                     <button
                         className={`px-10 py-2 text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
                         disabled={!isButtonEnabled}
@@ -127,3 +161,6 @@ const FormularioLogin = () => {
 };
 
 export default FormularioLogin;
+
+
+
