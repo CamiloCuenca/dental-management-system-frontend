@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import api from "../services/api"; // Cliente Axios configurado
+import Swal from 'sweetalert2';
 
 
 const FormularioRegistro = () => {
@@ -84,6 +85,14 @@ const FormularioRegistro = () => {
         try {
             const response = await api.post('/cuenta/register', payload);
             setMensaje(`Registro exitoso. ID: ${response.data}`);
+             Swal.fire({
+                            icon: 'success',
+                            title: 'Cuenta Creada',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            window.location.href = '/activarCuenta'; // Redirige después de aceptar
+                        });
         } catch (error) {
             if (error.response) {
                 setMensaje(`Error: ${error.response.data}`);
