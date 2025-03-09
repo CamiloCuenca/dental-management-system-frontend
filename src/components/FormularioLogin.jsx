@@ -36,13 +36,11 @@ const FormularioLogin = () => {
         try {
             const response = await api.post("/cuenta/login", {
                 idNumber: usuario,
-                password: contrasena,
-                captchaToken: captchaToken
+                password: contrasena
             }, {
                 headers: { "Content-Type": "application/json" }
             });
 
-            console.log(response.data);
             sessionStorage.setItem("token", response.data.token);
 
             // Mostrar alerta de éxito con SweetAlert2
