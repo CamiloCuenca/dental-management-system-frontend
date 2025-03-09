@@ -1,7 +1,7 @@
 import FormularioCita from "../components/FormularioCita";
 import TableCitas from "../components/TableCitas";
 import Header from "../components/Header";
-import Footer from "../components/Footer";
+import Footer from "../components/footer";
 
 export default function Citas() {
     return (
