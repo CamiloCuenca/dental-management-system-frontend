@@ -55,7 +55,7 @@ export default function Header() {
                 </div>
             </div>
             <div className="border-gray-400 border-t pt-6 text-[var(--color-gray-light)] text-center mt-6">
-                <p>© 2025 Corpodent - Clinica Odontológica. Todos los derechos reservados</p>
+                <p>© 2025 OdontoLogic. Todos los derechos reservados</p>
             </div>
         </footer>
     );
