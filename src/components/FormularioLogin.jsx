@@ -36,11 +36,13 @@ const FormularioLogin = () => {
         try {
             const response = await api.post("/cuenta/login", {
                 idNumber: usuario,
-                password: contrasena
+                password: contrasena,
+                captchaToken: captchaToken
             }, {
                 headers: { "Content-Type": "application/json" }
             });
 
+            console.log(response.data);
             sessionStorage.setItem("token", response.data.token);
 
             // Mostrar alerta de éxito con SweetAlert2
@@ -104,7 +106,7 @@ const FormularioLogin = () => {
                     </div>
 
                    {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
-                    <ReCAPTCHA sitekey='6LfZTu0qAAAAAO-EpbIWUAaX0L1KY31D5IOuuZhs' onChange={onChangeCaptcha}/> 
+                        <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
 
                     {mensajeError && <p className="text-red-500 text-sm">{mensajeError}</p>}
 
