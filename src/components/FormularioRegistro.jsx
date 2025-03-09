@@ -170,7 +170,7 @@ const FormularioRegistro = () => {
 
                     <div className='flex items-center justify-center mt-5'>
                         {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
-                        <ReCAPTCHA sitekey='6LfZTu0qAAAAAO-EpbIWUAaX0L1KY31D5IOuuZhs' onChange={onChangeCaptcha}/> 
+                        <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
                     </div>
 
                     {mensaje && <p className="text-center text-red-500 mt-3">{mensaje}</p>}
