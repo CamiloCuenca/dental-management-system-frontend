@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import imagenLogin from '../assets/imagenLogin.png';
 import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
+import api from "../services/api"; // Cliente Axios configurado
 
 const FormularioLogin = () => {
     const [captchaValido, setCaptchaValido] = useState(false);
@@ -9,7 +10,7 @@ const FormularioLogin = () => {
     const [contrasena, setContrasena] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [mensajeError, setMensajeError] = useState('');
-    
+
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
     const onChangeCaptcha = (e) => {
@@ -26,29 +27,26 @@ const FormularioLogin = () => {
 
     const isButtonEnabled = usuario.trim() !== '' && contrasena.trim() !== '' && captchaValido;
 
-    const handleLogin = async () => {
+    const login = async () => {
         if (!isButtonEnabled) return;
 
         try {
-            const response = await fetch('http://localhost:3000/login', {
-                method: 'POST',
+            console.log("Usuario:", usuario);
+            console.log("Contraseña:", contrasena);
+            const response = await api.post("/cuenta/login", {
+                idNumber: usuario,
+                password: contrasena
+            }, {
                 headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ usuario, contrasena })
+                    "Content-Type": "application/json"
+                }
             });
 
-            const data = await response.json();
-            
-            if (response.ok) {
-                console.log('Login exitoso:', data);
-                // Redirigir o manejar el login exitoso aquí
-            } else {
-                setMensajeError(data.message || 'Error en el inicio de sesión');
-            }
+            // Manejo de inicio de sesión exitoso, por ejemplo, almacenar token, redirigir, etc.
+            console.log(response.data);
         } catch (error) {
-            console.error('Error en la solicitud:', error);
-            setMensajeError('Hubo un problema con el servidor');
+            console.error(error);
+            setMensajeError("Error al iniciar sesión. Verifique sus credenciales.");
         }
     };
 
@@ -100,11 +98,11 @@ const FormularioLogin = () => {
                     <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />
 
                     {mensajeError && <p className="text-red-500 text-sm">{mensajeError}</p>}
-                    
+
                     <button 
                         className={`px-10 py-2 text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`} 
                         disabled={!isButtonEnabled}
-                        onClick={handleLogin}
+                        onClick={login}
                     >
                         Ingresar
                     </button>
