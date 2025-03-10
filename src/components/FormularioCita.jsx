@@ -47,7 +47,7 @@ const FormularioCita = () => {
 
         const citaData = {
             idPaciente: parseInt(pacienteId, 10),
-            estado: "PENDIENTE",
+            estado: "CONFIRMADA",
             tipoCita: tipoCita === "OTRO" ? otroTipoCita.toUpperCase() : tipoCita
         };
 
