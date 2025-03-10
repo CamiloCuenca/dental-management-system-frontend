@@ -2,9 +2,9 @@ import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 
 export default function Header() {
     return (
-        <footer className=" bg-[var(--color-secondary)] px-4 md:px-16 lg:px-28 py-8">
-
+        <footer className="bg-[var(--color-secondary)] px-4 md:px-16 lg:px-28 py-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Sección de información de contacto */}
                 <div>
                     <h2 className="text-lg font-bold mb-4 text-[var(--color-white)]">
                         Información de contacto
@@ -16,6 +16,8 @@ export default function Header() {
                         <li className="text-[var(--color-gray-light)]"> <b>Correo:</b> odontologic@info.com</li>
                     </ul>
                 </div>
+
+                {/* Sección de enlaces rápidos */}
                 <div>
                     <h2 className="text-lg font-bold mb-4 text-[var(--color-white)]">
                         Enlaces rápidos
@@ -28,32 +30,32 @@ export default function Header() {
                         <li> <a href="#" className="hover:underline text-[var(--color-gray-light)]"> Términos y condiciones </a></li>
                     </ul>
                 </div>
+
+                {/* Sección de redes sociales */}
                 <div>
                     <h2 className="text-lg font-bold mb-4 text-[var(--color-white)]">
                         Redes sociales
                     </h2>
                     <ul className="flex space-x-4">
                         <li>
-                            {" "}
-                            <FaFacebook className=" text-blue-900" /> {" "}
-                            <a href="https://www.facebook.com" className="hoover:underline text-[var(--color-gray-light)]"> Facebook</a>
+                            <FaFacebook className="text-blue-900" />
+                            <a href="https://www.facebook.com" className="hover:underline text-[var(--color-gray-light)]"> Facebook</a>
                         </li>
 
                         <li>
-                            {" "}
-                            <FaTwitter className=" text-blue-400" /> {" "}
-                            <a href="https://x.com" className="hoover:underline text-[var(--color-gray-light)]"> Twitter</a>
+                            <FaTwitter className="text-blue-400" />
+                            <a href="https://x.com" className="hover:underline text-[var(--color-gray-light)]"> Twitter</a>
                         </li>
 
                         <li>
-                            {" "}
-                            <FaInstagram className=" text-orange-500" /> {" "}
-                            <a href="https://www.instagram.com" className="hoover:underline text-[var(--color-gray-light)]"> Intagram</a>
+                            <FaInstagram className="text-orange-500" />
+                            <a href="https://www.instagram.com" className="hover:underline text-[var(--color-gray-light)]"> Instagram</a>
                         </li>
-
                     </ul>
                 </div>
             </div>
+
+            {/* Sección de derechos de autor */}
             <div className="border-gray-400 border-t pt-6 text-[var(--color-gray-light)] text-center mt-6">
                 <p>© 2025 OdontoLogic. Todos los derechos reservados</p>
             </div>
