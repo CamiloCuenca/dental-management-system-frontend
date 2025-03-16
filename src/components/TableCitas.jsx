@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "./Table";
-import api from "../services/api"; // Cliente Axios configurado para realizar peticiones HTTP
+import api from "../services/api";
+import { toast } from "react-hot-toast";
 
-// Definición de las columnas de la tabla
 const columns = [
   { key: "idCita", label: "ID Cita" },
   { key: "idPaciente", label: "ID Paciente" },
@@ -13,7 +13,6 @@ const columns = [
   { key: "acciones", label: "Acciones" },
 ];
 
-// Opciones disponibles para el tipo de cita
 const opcionesTipoCita = [
   "CONSULTA_GENERAL",
   "LIMPIEZA_DENTAL",
@@ -26,81 +25,89 @@ const opcionesTipoCita = [
 ];
 
 export default function TableCitas() {
-  // Estado para almacenar las citas obtenidas
   const [citas, setCitas] = useState([]);
-  // Estado para controlar si la búsqueda está en curso
   const [loading, setLoading] = useState(false);
-  // Estado para almacenar el ID del paciente ingresado
-  const [idPaciente, setIdPaciente] = useState(sessionStorage.getItem("idPaciente") || "");
-  // Estado para manejar la edición de una cita específica
+  const [idPaciente, setIdPaciente] = useState("");
   const [editandoId, setEditandoId] = useState(null);
 
-  // Función para buscar las citas de un paciente por su ID
+  useEffect(() => {
+    const storedId = sessionStorage.getItem("idPaciente");
+    if (storedId) setIdPaciente(storedId);
+  }, []);
+
   const buscarCitas = async () => {
     if (!idPaciente.trim()) {
-      alert("Por favor, ingrese un ID de paciente.");
+      toast.error("Por favor, ingrese un ID de paciente válido.");
       return;
     }
-
     setLoading(true);
     try {
       const response = await api.get(`/citas/paciente/${idPaciente}`);
-      setCitas(response.data);
+      const citasFormateadas = response.data.map((cita) => ({
+        ...cita,
+        fechaHora: new Date(cita.fechaHora).toLocaleString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }));
+      setCitas(citasFormateadas);
       sessionStorage.setItem("idPaciente", idPaciente);
     } catch (error) {
       console.error("Error al obtener citas:", error);
+      toast.error("No se pudieron cargar las citas.");
       setCitas([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para iniciar la edición de una cita
-  const handleEdit = (cita) => {
-    console.log("Editar cita:", cita);
-    setEditandoId(cita.idCita);
-  };
-
-  // Función para actualizar el tipo de cita
-  const handleTipoCitaChange = async (idCita, nuevoTipoCita) => {
-    try {
-      await api.put(`/citas/editar/${idCita}`, null, {
-        params: { nuevoTipoCita },
-      });
-
-      // Actualizar el estado local con la nueva información
-      setCitas((prevCitas) =>
-        prevCitas.map((c) =>
-          c.idCita === idCita ? { ...c, tipoCita: nuevoTipoCita } : c
-        )
-      );
-
-      setEditandoId(null);
-      alert("Cita actualizada correctamente.");
-    } catch (error) {
-      console.error("Error al actualizar la cita:", error);
-      alert("Ocurrió un error al actualizar la cita.");
+  const getEstadoClass = (estado) => {
+    switch (estado) {
+      case "CANCELADA":
+        return "bg-red-500 text-white px-3 py-1 rounded-lg";
+      case "CONFIRMADA":
+        return "bg-green-500 text-white px-3 py-1 rounded-lg";
+      case "PENDIENTE":
+        return "bg-yellow-500 text-black px-3 py-1 rounded-lg";
+      case "COMPLETADA":
+        return "bg-blue-500 text-white px-3 py-1 rounded-lg";
+      default:
+        return "bg-gray-300 text-black px-3 py-1 rounded-lg";
     }
   };
 
-  // Función para cancelar una cita
+  const handleEdit = (cita) => {
+    setEditandoId(cita.idCita);
+  };
+
+  const handleTipoCitaChange = async (idCita, nuevoTipoCita) => {
+    try {
+      await api.put(`/citas/editar/${idCita}`, null, { params: { nuevoTipoCita } });
+      setCitas((prevCitas) =>
+        prevCitas.map((c) => (c.idCita === idCita ? { ...c, tipoCita: nuevoTipoCita } : c))
+      );
+      setEditandoId(null);
+      toast.success("Cita actualizada correctamente.");
+    } catch (error) {
+      console.error("Error al actualizar la cita:", error);
+      toast.error("Ocurrió un error al actualizar la cita.");
+    }
+  };
+
   const handleDelete = async (cita) => {
     if (window.confirm("¿Seguro que quieres cancelar esta cita?")) {
       try {
-        console.log("ID de la cita a cancelar:", cita.idCita);
         await api.put(`/citas/cancelar/${cita.idCita}`);
-
-        // Actualizar el estado de la cita en la lista de citas
         setCitas((prevCitas) =>
-          prevCitas.map((c) =>
-            c.idCita === cita.idCita ? { ...c, estado: "CANCELADA" } : c
-          )
+          prevCitas.map((c) => (c.idCita === cita.idCita ? { ...c, estado: "CANCELADA" } : c))
         );
-
-        alert("Cita cancelada correctamente.");
+        toast.success("Cita cancelada correctamente.");
       } catch (error) {
         console.error("Error al cancelar la cita:", error);
-        alert("Ocurrió un error al cancelar la cita.");
+        toast.error("Ocurrió un error al cancelar la cita.");
       }
     }
   };
@@ -111,8 +118,6 @@ export default function TableCitas() {
         <h2 className="text-2xl font-bold text-secondary mb-4 text-center">
           🦷 Consulta tus Citas 🦷
         </h2>
-
-        {/* Campo de entrada para ingresar el ID del paciente y botón de búsqueda */}
         <div className="flex flex-col sm:flex-row gap-4 items-center mb-4">
           <input
             type="text"
@@ -123,20 +128,22 @@ export default function TableCitas() {
           />
           <button
             onClick={buscarCitas}
-            className="bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-secondary transition"
+            disabled={loading}
+            className={`px-6 py-3 rounded-lg font-semibold shadow-md transition ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-primary text-white hover:bg-secondary"}`}
           >
-            Buscar
+            {loading ? "Buscando..." : "Buscar"}
           </button>
         </div>
-
-        {/* Tabla de citas o mensaje de carga */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <p className="text-secondary text-center">Cargando citas...</p>
           ) : (
             <Table
               columns={columns}
-              data={citas}
+              data={citas.map((row) => ({
+                ...row,
+                estado: <span className={getEstadoClass(row.estado)}>{row.estado}</span>,
+              }))}
               onEdit={handleEdit}
               onDelete={handleDelete}
               editandoId={editandoId}
