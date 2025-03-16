@@ -51,17 +51,21 @@ const FormularioCita = () => {
 
         // Construcción del objeto con los datos de la cita
         const citaData = {
+
             idPaciente: parseInt(pacienteId, 10), // Convertir el ID del paciente a número entero
             estado: "PENDIENTE", // Estado inicial de la cita
             tipoCita: tipoCita === "OTRO" ? otroTipoCita.toUpperCase() : tipoCita // Si el tipo de cita es "OTRO", usar el valor personalizado
+
         };
 
         const toastId = toast.loading("⏳ Agendando cita..."); // Mostrar mensaje de carga mientras se procesa la solicitud
 
         try {
+
             await api.post("/citas/crear", citaData); // Enviar la solicitud POST al backend
             toast.dismiss(toastId); // Ocultar mensaje de carga
             toast.success("✅ Cita creada con éxito!"); // Mostrar mensaje de éxito
+
 
             // Limpiar el formulario después del envío exitoso (excepto el pacienteId)
             setTipoCita('CONSULTA_GENERAL');
@@ -87,7 +91,8 @@ const FormularioCita = () => {
                         id="pacienteId"
                         value={pacienteId}
                         onChange={(e) => setPacienteId(e.target.value)}
-                        disabled={!!pacienteId} // Deshabilitar si el ID del paciente ya está prellenado
+
+                        disabled={false}
                         className="w-full p-2 border rounded-lg bg-gray-100 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
                     />
                 </div>
