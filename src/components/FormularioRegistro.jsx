@@ -6,6 +6,8 @@ import Swal from 'sweetalert2';
 
 
 const FormularioRegistro = () => {
+
+    // Estado para almacenar los valores del formulario
     const [formData, setFormData] = useState({
         identificacion: '',
         primerNombre: '',
@@ -17,23 +19,35 @@ const FormularioRegistro = () => {
         contraseña: '',
         confirmarContraseña: ''
     });
+    // Estado para validar si el captcha es válido
     const [captchaValido, setCaptchaValido] = useState(false);
+
+    // Estado para verificar si el formulario es válido
     const [formValido, setFormValido] = useState(false);
+
+    // Estados para mostrar/ocultar contraseñas
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    // Estado para almacenar los errores de validación
     const [errors, setErrors] = useState({ correo: '', contraseña: '', confirmarContraseña: '' });
+
+    // Estado para mensajes de error o éxito
     const [mensaje, setMensaje] = useState('');
 
+    // Validar el formulario cada vez que cambien los datos o el captcha
     useEffect(() => {
         validateForm();
     }, [formData, captchaValido]);
 
+    // Maneja el cambio de valores en los inputs
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({ ...prevState, [name]: value }));
         validateField(name, value);
     };
 
+    // Validación de campos específicos
     const validateField = (name, value) => {
         let error = '';
 
@@ -56,16 +70,19 @@ const FormularioRegistro = () => {
         setErrors(prevErrors => ({ ...prevErrors, [name]: error }));
     };
 
+    // Verifica si todos los campos están completos y sin errores
     const validateForm = () => {
         const allFieldsFilled = Object.values(formData).every(value => value.trim() !== '');
         const noErrors = Object.values(errors).every(error => error === '');
         setFormValido(allFieldsFilled && noErrors && captchaValido);
     };
 
+    // Maneja el cambio de estado del captcha
     const onChangeCaptcha = (value) => {
         setCaptchaValido(!!value);
     };
 
+    // Manejo del envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -85,14 +102,14 @@ const FormularioRegistro = () => {
         try {
             const response = await api.post('/cuenta/register', payload);
             setMensaje(`Registro exitoso. ID: ${response.data}`);
-             Swal.fire({
-                            icon: 'success',
-                            title: 'Cuenta Creada',
-                            confirmButtonColor: '#3085d6',
-                            confirmButtonText: 'Aceptar'
-                        }).then(() => {
-                            window.location.href = '/activarCuenta'; // Redirige después de aceptar
-                        });
+            Swal.fire({
+                icon: 'success',
+                title: 'Cuenta Creada',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Aceptar'
+            }).then(() => {
+                window.location.href = '/activarCuenta'; // Redirige después de aceptar
+            });
         } catch (error) {
             if (error.response) {
                 setMensaje(`Error: ${error.response.data}`);
@@ -117,6 +134,7 @@ const FormularioRegistro = () => {
                 <hr className="border-t border-gray-600 my-4" />
 
                 <form onSubmit={handleSubmit}>
+                    {/* Aquí van los campos del formulario con validaciones */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {[
                             { label: "Número de identificación*:", type: "number", name: "identificacion", placeholder: "Ingrese su número de identificación" },
@@ -170,7 +188,7 @@ const FormularioRegistro = () => {
 
                     <div className='flex items-center justify-center mt-5'>
                         {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
-                        <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
+                        <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha} />
                     </div>
 
                     {mensaje && <p className="text-center text-red-500 mt-3">{mensaje}</p>}

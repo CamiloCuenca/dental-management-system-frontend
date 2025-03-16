@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Table from "./Table";
-import api from "../services/api"; // Cliente Axios configurado
+import api from "../services/api"; // Cliente Axios configurado para realizar peticiones HTTP
 
+// Definición de las columnas de la tabla
 const columns = [
   { key: "idCita", label: "ID Cita" },
   { key: "idPaciente", label: "ID Paciente" },
@@ -12,6 +13,7 @@ const columns = [
   { key: "acciones", label: "Acciones" },
 ];
 
+// Opciones disponibles para el tipo de cita
 const opcionesTipoCita = [
   "CONSULTA_GENERAL",
   "LIMPIEZA_DENTAL",
@@ -24,11 +26,16 @@ const opcionesTipoCita = [
 ];
 
 export default function TableCitas() {
+  // Estado para almacenar las citas obtenidas
   const [citas, setCitas] = useState([]);
+  // Estado para controlar si la búsqueda está en curso
   const [loading, setLoading] = useState(false);
+  // Estado para almacenar el ID del paciente ingresado
   const [idPaciente, setIdPaciente] = useState(sessionStorage.getItem("idPaciente") || "");
-  const [editandoId, setEditandoId] = useState(null); // ID de la cita en edición
+  // Estado para manejar la edición de una cita específica
+  const [editandoId, setEditandoId] = useState(null);
 
+  // Función para buscar las citas de un paciente por su ID
   const buscarCitas = async () => {
     if (!idPaciente.trim()) {
       alert("Por favor, ingrese un ID de paciente.");
@@ -48,17 +55,20 @@ export default function TableCitas() {
     }
   };
 
+  // Función para iniciar la edición de una cita
   const handleEdit = (cita) => {
     console.log("Editar cita:", cita);
     setEditandoId(cita.idCita);
   };
 
+  // Función para actualizar el tipo de cita
   const handleTipoCitaChange = async (idCita, nuevoTipoCita) => {
     try {
       await api.put(`/citas/editar/${idCita}`, null, {
         params: { nuevoTipoCita },
       });
 
+      // Actualizar el estado local con la nueva información
       setCitas((prevCitas) =>
         prevCitas.map((c) =>
           c.idCita === idCita ? { ...c, tipoCita: nuevoTipoCita } : c
@@ -73,12 +83,14 @@ export default function TableCitas() {
     }
   };
 
+  // Función para cancelar una cita
   const handleDelete = async (cita) => {
     if (window.confirm("¿Seguro que quieres cancelar esta cita?")) {
       try {
         console.log("ID de la cita a cancelar:", cita.idCita);
         await api.put(`/citas/cancelar/${cita.idCita}`);
 
+        // Actualizar el estado de la cita en la lista de citas
         setCitas((prevCitas) =>
           prevCitas.map((c) =>
             c.idCita === cita.idCita ? { ...c, estado: "CANCELADA" } : c
@@ -100,6 +112,7 @@ export default function TableCitas() {
           🦷 Consulta tus Citas 🦷
         </h2>
 
+        {/* Campo de entrada para ingresar el ID del paciente y botón de búsqueda */}
         <div className="flex flex-col sm:flex-row gap-4 items-center mb-4">
           <input
             type="text"
@@ -116,6 +129,7 @@ export default function TableCitas() {
           </button>
         </div>
 
+        {/* Tabla de citas o mensaje de carga */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <p className="text-secondary text-center">Cargando citas...</p>
