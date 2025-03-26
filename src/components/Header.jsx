@@ -1,61 +1,55 @@
-import { useState, useEffect } from "react"; // Importamos React y los hooks useState y useEffect
-import { FaBars, FaTimes } from "react-icons/fa"; // Importamos iconos de react-icons
+import { useState, useEffect } from "react";
+import { FaBars, FaTimes } from "react-icons/fa";
+import { useLocation } from "react-router-dom"; // Importamos useLocation para detectar la ruta actual
 
 export default function Header() {
-    // Estado para controlar si el menú hamburguesa está abierto o cerrado
     const [isOpen, setIsOpen] = useState(false);
-    
-    // Estado para verificar si el usuario está autenticado
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const location = useLocation(); // Obtiene la ubicación actual
 
     useEffect(() => {
-        // Verificar si hay un token en sessionStorage
         const token = sessionStorage.getItem("token");
-        setIsLoggedIn(!!token); // Si hay token, establece isLoggedIn en true, si no, en false
+        setIsLoggedIn(!!token);
     }, []);
 
     const handleLogout = () => {
-        sessionStorage.removeItem("token"); // Eliminar token de sessionStorage
-        setIsLoggedIn(false); // Actualizar el estado de autenticación
-        window.location.reload(); // Recargar la página para reflejar los cambios
+        sessionStorage.removeItem("token");
+        setIsLoggedIn(false);
+        window.location.reload();
     };
+
+    const getLinkClass = (path) => (
+        location.pathname === path ? "text-primary font-bold" : "hover:text-accent"
+    );
 
     return (
         <header className="bg-secondary">
             <nav className="text-white py-5 px-6">
                 <div className="flex justify-between items-center">
-                    {/* Nombre de la aplicación */}
                     <h1 className="text-3xl font-bold">OdontoLogic</h1>
-
-                    {/* Botón del menú hamburguesa para pantallas pequeñas */}
-                    <button 
+                    <button
                         className="md:hidden text-3xl focus:outline-none"
-                        onClick={() => setIsOpen(!isOpen)} // Cambia el estado de isOpen al hacer clic
+                        onClick={() => setIsOpen(!isOpen)}
                     >
-                        {isOpen ? <FaTimes /> : <FaBars />} {/* Alterna entre ícono de abrir y cerrar menú */}
+                        {isOpen ? <FaTimes /> : <FaBars />}
                     </button>
                 </div>
-
-                {/* Menú de navegación */}
                 <ul className={`md:flex md:justify-center md:space-x-8 text-2xl mt-5 md:mt-0 transition-all duration-300 ${isOpen ? 'block' : 'hidden'} md:block`}>
-                    <li><a href="/" className="block md:inline hover:text-accent">Home</a></li>
-                    <li><a href="/citas" className="block md:inline hover:text-accent">Citas</a></li>
-
-                    {/* Si el usuario está autenticado, muestra la opción de cerrar sesión */}
+                    <li><a href="/" className={`block md:inline ${getLinkClass("/")}`}>Home</a></li>
+                    <li><a href="/citas" className={`block md:inline ${getLinkClass("/citas")}`}>Citas</a></li>
                     {isLoggedIn ? (
                         <li>
-                            <button 
+                            <button
                                 className="block md:inline text-red-500 hover:text-red-700 font-semibold"
-                                onClick={handleLogout} // Llama a la función handleLogout al hacer clic
+                                onClick={handleLogout}
                             >
                                 Cerrar sesión
                             </button>
                         </li>
                     ) : (
-                        // Si no está autenticado, muestra las opciones de inicio de sesión y registro
                         <>
-                            <li><a href="/login" className="block md:inline hover:text-accent">Iniciar sesión</a></li>
-                            <li><a href="/registro" className="block md:inline hover:text-accent">Registro</a></li>
+                            <li><a href="/login" className={`block md:inline ${getLinkClass("/login")}`}>Iniciar sesión</a></li>
+                            <li><a href="/registro" className={`block md:inline ${getLinkClass("/registro")}`}>Registro</a></li>
                         </>
                     )}
                 </ul>

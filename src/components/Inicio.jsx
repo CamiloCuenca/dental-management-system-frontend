@@ -1,5 +1,4 @@
 import imagenAgendaCita from '../assets/imagenAgendaCita.png';
-import imagenLogin from '../assets/imagenLogin.png';
 
 const Inicio = () => {
     return (

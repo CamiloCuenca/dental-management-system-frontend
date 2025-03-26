@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import api from '../services/api'; // Cliente Axios configurado para realizar peticiones HTTP
 
@@ -139,7 +139,7 @@ const FormularioCita = () => {
             {/* Botón de enviar */}
             <button
                 type="submit"
-                className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-secondary transition transform hover:scale-105"
+                className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-pink-600 transition transform hover:scale-105"
             >
                 Agendar Cita
             </button>
