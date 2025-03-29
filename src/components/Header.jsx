@@ -24,23 +24,17 @@ export default function Header() {
 
     return (
         <header className="bg-secondary">
-            <nav className="text-white py-5 px-6">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold">OdontoLogic</h1>
-                    <button
-                        className="md:hidden text-3xl focus:outline-none"
-                        onClick={() => setIsOpen(!isOpen)}
-                    >
-                        {isOpen ? <FaTimes /> : <FaBars />}
-                    </button>
-                </div>
-                <ul className={`md:flex md:justify-center md:space-x-8 text-2xl mt-5 md:mt-0 transition-all duration-300 ${isOpen ? 'block' : 'hidden'} md:block`}>
-                    <li><a href="/" className={`block md:inline ${getLinkClass("/")}`}>Home</a></li>
-                    <li><a href="/citas" className={`block md:inline ${getLinkClass("/citas")}`}>Citas</a></li>
+            <nav className="text-white py-4 px-6 flex items-center justify-between">
+                <h1 className="text-4xl font-extrabold text-blue-500 animate-pulse drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]">
+                    OdontoLogic
+                </h1>
+                <ul className="hidden md:flex md:items-center md:space-x-8 text-xl">
+                    <li><a href="/" className={`block ${getLinkClass("/")}`}>Home</a></li>
+                    <li><a href="/citas" className={`block ${getLinkClass("/citas")}`}>Citas</a></li>
                     {isLoggedIn ? (
                         <li>
                             <button
-                                className="block md:inline text-red-500 hover:text-red-700 font-semibold"
+                                className="block text-red-500 hover:text-red-700 font-semibold"
                                 onClick={handleLogout}
                             >
                                 Cerrar sesión
@@ -48,11 +42,17 @@ export default function Header() {
                         </li>
                     ) : (
                         <>
-                            <li><a href="/login" className={`block md:inline ${getLinkClass("/login")}`}>Iniciar sesión</a></li>
-                            <li><a href="/registro" className={`block md:inline ${getLinkClass("/registro")}`}>Registro</a></li>
+                            <li><a href="/login" className={`block ${getLinkClass("/login")}`}>Iniciar sesión</a></li>
+                            <li><a href="/registro" className={`block ${getLinkClass("/registro")}`}>Registro</a></li>
                         </>
                     )}
                 </ul>
+                <button
+                    className="md:hidden text-3xl focus:outline-none"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    {isOpen ? <FaTimes /> : <FaBars />}
+                </button>
             </nav>
         </header>
     );

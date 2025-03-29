@@ -146,14 +146,14 @@ const FormularioRegistro = () => {
                             { label: "Correo electrónico*:", type: "email", name: "correo", className: "sm:col-span-2", error: errors.correo, placeholder: "Ingrese su correo electrónico" }
                         ].map(({ label, type, name, className, placeholder, error }, index) => (
                             <div key={index} className={`flex flex-col ${className || ''}`}>
-                                <span className="text-lg text-left">{label}</span>
+                                <label className="text-pink-600 font-medium">{label}</label>
                                 <input
                                     type={type}
                                     name={name}
                                     value={formData[name]}
                                     placeholder={placeholder}
                                     onChange={handleChange}
-                                    className={`rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)] ${error ? 'border-red-500' : ''}`}
+                                    className={`rounded-md p-2 border-2 outline-none border-gray-300 focus:border-[#D72F8B] hover:border-[#D72F8B] transition-all duration-300 ${error ? 'border-red-500' : ''}`}
                                 />
                                 {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                             </div>
@@ -166,7 +166,7 @@ const FormularioRegistro = () => {
                             { label: "Confirmar contraseña*:", name: "confirmarContraseña", show: showConfirmPassword, setShow: setShowConfirmPassword, error: errors.confirmarContraseña, placeholder: "Ingrese de nuevo la contraseña" }
                         ].map(({ label, name, show, setShow, error, placeholder }, index) => (
                             <div key={index} className="flex flex-col relative">
-                                <span className="text-lg text-left">{label}</span>
+                                <label className="text-pink-600 font-medium">{label}</label>
                                 <div className="relative">
                                     <input
                                         type={show ? "text" : "password"}
@@ -174,7 +174,7 @@ const FormularioRegistro = () => {
                                         placeholder={placeholder}
                                         value={formData[name]}
                                         onChange={handleChange}
-                                        className={`w-full rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)] pr-10 ${error ? 'border-red-500' : ''}`}
+                                        className={`w-full rounded-md p-2 border-2 outline-none border-gray-300 focus:border-[#D72F8B] hover:border-[#D72F8B] transition-all duration-300 ${error ? 'border-red-500' : ''}`}
                                     />
                                     <button type="button" onClick={() => setShow(!show)} className="absolute inset-y-0 right-2 flex items-center">
                                         {show ? <FaRegEyeSlash /> : <FaRegEye />}
