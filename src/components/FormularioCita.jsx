@@ -11,7 +11,6 @@ const FormularioCita = () => {
         const obtenerIdUsuarioDesdeToken = () => {
             const token = sessionStorage.getItem('token');
             if (!token) return null;
-
             try {
                 const payloadBase64 = token.split('.')[1];
                 const decodedPayload = JSON.parse(atob(payloadBase64));
@@ -61,34 +60,41 @@ const FormularioCita = () => {
         }
     };
 
-    const isButtonEnabled = pacienteId.trim() !== '';
-
     return (
-        <form onSubmit={handleSubmit} className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md space-y-6">
-            <h2 className="text-2xl font-bold text-center text-secondary">🦷 Agendar Cita Odontológica</h2>
+        <form
+            onSubmit={handleSubmit}
+            className="max-w-lg mx-auto bg-white p-6 rounded-xl shadow-lg space-y-6 border border-gray-light">
 
-            <div className="grid gap-4">
+            <h2 className="text-3xl font-bold text-center text-secondary">🦷 Agendar Cita</h2>
+
+            <div className="grid gap-5">
+                {/* Documento de identidad */}
                 <div>
-                    <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="pacienteId">
-                        Documento de identidad del paciente:
+                    <label className="block text-gray-700 font-semibold mb-1" htmlFor="pacienteId">
+                        Documento de identidad:
                     </label>
                     <input
                         type="text"
                         id="pacienteId"
                         value={pacienteId}
                         onChange={(e) => setPacienteId(e.target.value)}
-                        className="w-full p-2 border rounded-lg bg-gray-100 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
+                        className="w-full p-3 border border-gray-300 rounded-lg bg-gray-light text-gray-700
+                        focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition-all"
                     />
                 </div>
 
+                {/* Tipo de cita */}
                 <div>
-                    <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="tipoCita">Tipo de cita:</label>
+                    <label className="block text-gray-700 font-semibold mb-1" htmlFor="tipoCita">
+                        Tipo de cita:
+                    </label>
                     <select
                         id="tipoCita"
                         value={tipoCita}
                         onChange={handleTipoCitaChange}
                         required
-                        className="w-full p-2 border rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
+                        className="w-full p-3 border border-gray-300 rounded-lg bg-gray-light text-gray-700
+                        focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition-all"
                     >
                         <option value="CONSULTA_GENERAL">Consulta General</option>
                         <option value="LIMPIEZA_DENTAL">Limpieza Dental</option>
@@ -101,9 +107,10 @@ const FormularioCita = () => {
                     </select>
                 </div>
 
+                {/* Especificar otro tipo de cita */}
                 {tipoCita === 'OTRO' && (
                     <div>
-                        <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="otroTipoCita">
+                        <label className="block text-gray-700 font-semibold mb-1" htmlFor="otroTipoCita">
                             Especificar otro tipo de cita:
                         </label>
                         <input
@@ -112,18 +119,21 @@ const FormularioCita = () => {
                             value={otroTipoCita}
                             onChange={(e) => setOtroTipoCita(e.target.value)}
                             required
-                            className="w-full p-2 border rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
+                            className="w-full p-3 border border-gray-300 rounded-lg bg-gray-light text-gray-700
+                            focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition-all"
                         />
                     </div>
                 )}
             </div>
 
+            {/* Botón de enviar */}
             <button
                 type="submit"
-                className={`w-full py-2 px-4 rounded-lg font-bold transition transform hover:scale-105 ${isButtonEnabled ? 'bg-blue-500 text-white hover:bg-pink-600' : 'bg-gray-400 cursor-not-allowed'}`}
-                disabled={!isButtonEnabled}
+                className={`w-full py-3 px-4 rounded-lg font-bold transition-all transform hover:scale-105 
+                text-white ${pacienteId.trim() !== '' ? 'bg-primary hover:bg-accent shadow-md' : 'bg-gray-400 cursor-not-allowed'}`}
+                disabled={!pacienteId.trim()}
             >
-                Agendar Cita
+                📅 Agendar Cita
             </button>
         </form>
     );

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { useLocation } from "react-router-dom"; // Importamos useLocation para detectar la ruta actual
+import { useLocation } from "react-router-dom";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const location = useLocation(); // Obtiene la ubicación actual
+    const location = useLocation();
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
@@ -19,29 +19,36 @@ export default function Header() {
     };
 
     const getLinkClass = (path) => (
-        location.pathname === path ? "text-primary font-bold" : "hover:text-accent"
+        `relative text-lg font-semibold tracking-wide uppercase transition-all duration-300 ${location.pathname === path ? "text-primary" : "text-white hover:text-accent"}`
     );
 
     return (
-        <header className="bg-secondary">
+        <header className="bg-secondary shadow-lg">
             <nav className="text-white py-4 px-6 flex items-center justify-between">
-                {/* Título alineado a la izquierda */}
-                <h1 className="text-4xl font-extrabold text-white animate-pulse drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]">
-                    OdontoLogic
+
+                {/* Logo estilizado con efecto glow */}
+                <h1 className="text-4xl font-extrabold text-white animate-pulse drop-shadow-[0_0_15px_rgba(215,47,139,0.7)]">
+                    Odonto<span className="text-primary">Logic</span>
                 </h1>
 
-                {/* Sección central con Home y Citas */}
-                <ul className="flex space-x-8 text-xl">
-                    <li><a href="/" className={getLinkClass("/")}>Home</a></li>
-                    <li><a href="/citas" className={getLinkClass("/citas")}>Citas</a></li>
+                {/* Enlaces principales con subrayado animado */}
+                <ul className="hidden md:flex space-x-8 text-xl">
+                    {["/", "/citas"].map((path, index) => (
+                        <li key={index} className="relative group">
+                            <a href={path} className={getLinkClass(path)}>
+                                {path === "/" ? "Home" : "Citas"}
+                            </a>
+                            <span className="absolute left-0 bottom-0 w-0 h-[3px] bg-accent transition-all duration-300 group-hover:w-full"></span>
+                        </li>
+                    ))}
                 </ul>
 
-                {/* Sección derecha con Iniciar sesión y Registro */}
-                <ul className="flex space-x-6 text-xl">
+                {/* Botones de usuario */}
+                <ul className="hidden md:flex space-x-6 text-xl">
                     {isLoggedIn ? (
                         <li>
                             <button
-                                className="text-red-500 hover:text-red-700 font-semibold"
+                                className="text-red-500 hover:text-red-700 font-semibold transition-all duration-300"
                                 onClick={handleLogout}
                             >
                                 Cerrar sesión
@@ -55,14 +62,37 @@ export default function Header() {
                     )}
                 </ul>
 
-                {/* Botón de menú hamburguesa en móviles */}
+                {/* Menú hamburguesa para móviles */}
                 <button
-                    className="md:hidden text-3xl focus:outline-none absolute right-6"
+                    className="md:hidden text-3xl text-white focus:outline-none"
                     onClick={() => setIsOpen(!isOpen)}
                 >
                     {isOpen ? <FaTimes /> : <FaBars />}
                 </button>
             </nav>
+
+            {/* Menú móvil */}
+            {isOpen && (
+                <div className="md:hidden bg-secondary text-white py-4 px-6 space-y-4">
+                    {["Home", "Citas", "Iniciar sesión", "Registro"].map((text, index) => (
+                        <a
+                            key={index}
+                            href={text === "Home" ? "/" : text === "Citas" ? "/citas" : text === "Iniciar sesión" ? "/login" : "/registro"}
+                            className="block text-xl font-semibold hover:text-accent transition-all duration-300"
+                        >
+                            {text}
+                        </a>
+                    ))}
+                    {isLoggedIn && (
+                        <button
+                            className="block text-xl font-semibold text-red-500 hover:text-red-700 transition-all duration-300"
+                            onClick={handleLogout}
+                        >
+                            Cerrar sesión
+                        </button>
+                    )}
+                </div>
+            )}
         </header>
     );
 }
