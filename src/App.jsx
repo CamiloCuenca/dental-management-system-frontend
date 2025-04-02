@@ -10,6 +10,7 @@ import CambiarContraseña from './pages/cambiarContraseña';
 import CambiarContraseñaActual from './pages/cambiarContraseñaActual';
 import Perfil from './pages/perfil';
 import HistorialMedico from './pages/historialMedicoUsuario';
+import ActualizarUsuario from './pages/actualizarUsuario';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -53,6 +54,9 @@ function App() {
 
         {/* Ruta para el historial médico */}
         <Route path="/historialMedicoUsuario" element={<HistorialMedico />} />
+
+        {/* Ruta para actualizar el usuario */}
+        <Route path="/actualizarUsuario" element={<ActualizarUsuario />} />
       </Routes>
     </Router>
   )

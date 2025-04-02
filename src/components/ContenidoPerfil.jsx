@@ -92,7 +92,7 @@ const ContenidoPerfil = () => {
             <p><strong>Correo Electrónico:</strong> {formData.email}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mt-6">
-            <a href="/#">
+            <a href="/actualizarUsuario">
               <button className="w-full px-6 py-3 text-xl sm:text-2xl rounded-md text-white bg-blue-500 hover:bg-blue-600 transition-all duration-300">
                 Actualizar Información
               </button>
