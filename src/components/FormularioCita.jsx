@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../services/api';
 
 const FormularioCita = () => {
+    const [captchaValido, setCaptchaValido] = useState(false);
     const [pacienteId, setPacienteId] = useState('');
     const [tipoCita, setTipoCita] = useState('CONSULTA_GENERAL');
     const [otroTipoCita, setOtroTipoCita] = useState('');
@@ -32,6 +34,10 @@ const FormularioCita = () => {
         if (e.target.value !== 'OTRO') {
             setOtroTipoCita('');
         }
+    };
+
+    const onChangeCaptcha = (value) => {
+        setCaptchaValido(!!value);
     };
 
     const handleSubmit = async (e) => {
@@ -124,14 +130,17 @@ const FormularioCita = () => {
                         />
                     </div>
                 )}
+
+                {/* CAPTCHA */}
+                <center><ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> </center>
             </div>
 
             {/* Botón de enviar */}
             <button
                 type="submit"
                 className={`w-full py-3 px-4 rounded-lg font-bold transition-all transform hover:scale-105 
-                text-white ${pacienteId.trim() !== '' ? 'bg-primary hover:bg-accent shadow-md' : 'bg-gray-400 cursor-not-allowed'}`}
-                disabled={!pacienteId.trim()}
+                text-white ${pacienteId.trim() !== '' && captchaValido ? 'bg-primary hover:bg-accent shadow-md' : 'bg-gray-400 cursor-not-allowed'}`}
+                disabled={!(pacienteId.trim() !== '' && captchaValido)}
             >
                 📅 Agendar Cita
             </button>

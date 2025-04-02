@@ -18,27 +18,27 @@ function App() {
         position="top-center"
         reverseOrder={false}
       />
-      
+
       {/* Se definen las rutas de la aplicación usando el componente Routes */}
       <Routes>
         {/* Ruta principal que carga la página de inicio */}
         <Route path="/" element={<Home />} />
-        
+
         {/* Ruta para la gestión de citas */}
         <Route path="/citas" element={<Citas />} />
-        
+
         {/* Ruta para el inicio de sesión */}
         <Route path="/login" element={<Login />} />
-        
+
         {/* Ruta para el registro de nuevos usuarios */}
         <Route path="/registro" element={<Registro />} />
-        
+
         {/* Ruta para la activación de cuentas */}
         <Route path="/activarCuenta" element={<ActivarCuenta />} />
-        
+
         {/* Ruta para recuperar la contraseña */}
         <Route path="/recuperarContraseña" element={<RecuperarContraseña />} />
-        
+
         {/* Ruta para cambiar la contraseña */}
         <Route path="/cambiarContraseña" element={<CambiarContraseña />} />
       </Routes>

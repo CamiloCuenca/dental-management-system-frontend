@@ -27,16 +27,18 @@ export default function Header() {
             <nav className="text-white py-4 px-6 flex items-center justify-between">
 
                 {/* Logo estilizado con efecto glow */}
-                <h1 className="text-4xl font-extrabold text-white animate-pulse drop-shadow-[0_0_15px_rgba(215,47,139,0.7)]">
-                    Odonto<span className="text-primary">Logic</span>
-                </h1>
+                <a href="/" className={getLinkClass("/")}>
+                    <h1 className="text-4xl font-extrabold text-white animate-pulse drop-shadow-[0_0_15px_rgba(215,47,139,0.7)] normal-case">
+                        Odonto<span className="text-primary">Logic</span>
+                    </h1>
+                </a>
 
                 {/* Enlaces principales con subrayado animado */}
                 <ul className="hidden md:flex space-x-8 text-xl">
-                    {["/", "/citas"].map((path, index) => (
+                    {["/", "/citas", "/historialMedicoUsuario"].map((path, index) => (
                         <li key={index} className="relative group">
                             <a href={path} className={getLinkClass(path)}>
-                                {path === "/" ? "Home" : "Citas"}
+                                {path === "/" ? "Home" : path === "/citas" ? "Citas" : "Historiales Médicos"}
                             </a>
                             <span className="absolute left-0 bottom-0 w-0 h-[3px] bg-accent transition-all duration-300 group-hover:w-full"></span>
                         </li>
@@ -74,10 +76,10 @@ export default function Header() {
             {/* Menú móvil */}
             {isOpen && (
                 <div className="md:hidden bg-secondary text-white py-4 px-6 space-y-4">
-                    {["Home", "Citas", "Iniciar sesión", "Registro"].map((text, index) => (
+                    {["Home", "Citas", "Historiales Médicos", "Iniciar sesión", "Registro"].map((text, index) => (
                         <a
                             key={index}
-                            href={text === "Home" ? "/" : text === "Citas" ? "/citas" : text === "Iniciar sesión" ? "/login" : "/registro"}
+                            href={text === "Home" ? "/" : text === "Citas" ? "/citas" : text === "Historiales Médicos" ? "/historialMedicoUsuario" : text === "Iniciar sesión" ? "/login" : "/registro"}
                             className="block text-xl font-semibold hover:text-accent transition-all duration-300"
                         >
                             {text}
