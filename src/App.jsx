@@ -8,6 +8,8 @@ import ActivarCuenta from './pages/activarCuenta';
 import RecuperarContraseña from './pages/recuperarContraseña';
 import CambiarContraseña from './pages/cambiarContraseña';
 import CitasDoctor from './pages/citasDoctor';
+import Perfil from './pages/perfil';
+import HistorialMedico from './pages/historialMedicoUsuario';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -45,6 +47,12 @@ function App() {
 
         {/* Ruta para citas del doctor */}
         <Route path="/citasDoctor" element={<CitasDoctor />} />
+
+        {/* Ruta para el perfil */}
+        <Route path="/perfil" element={<Perfil />} />
+
+        {/* Ruta para el historial médico */}
+        <Route path="/historialMedicoUsuario" element={<HistorialMedico />} />
       </Routes>
     </Router>
   )
