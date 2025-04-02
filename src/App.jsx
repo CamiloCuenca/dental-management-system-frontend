@@ -7,6 +7,7 @@ import Registro from './pages/registro';
 import ActivarCuenta from './pages/activarCuenta';
 import RecuperarContraseña from './pages/recuperarContraseña';
 import CambiarContraseña from './pages/cambiarContraseña';
+import CitasDoctor from './pages/citasDoctor';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -41,6 +42,9 @@ function App() {
 
         {/* Ruta para cambiar la contraseña */}
         <Route path="/cambiarContraseña" element={<CambiarContraseña />} />
+
+        {/* Ruta para citas del doctor */}
+        <Route path="/citasDoctor" element={<CitasDoctor />} />
       </Routes>
     </Router>
   )
