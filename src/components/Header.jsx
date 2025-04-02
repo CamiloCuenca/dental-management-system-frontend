@@ -7,17 +7,19 @@ export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userName, setUserName] = useState("");
+    const [userLastName, setUserLastName] = useState("");
     const location = useLocation();
 
-    const obtenerNombreDesdeToken = () => {
+    const obtenerDatosUsuarioDesdeToken = () => {
         const token = sessionStorage.getItem('token');
         if (!token) return null;
         try {
             const payloadBase64 = token.split('.')[1];
             const decodedPayload = JSON.parse(atob(payloadBase64));
-            // Decodificar el nombre para manejar caracteres especiales
+            // Decodificar el nombre y apellido para manejar caracteres especiales
             const nombre = decodeURIComponent(escape(decodedPayload.nombre));
-            return nombre || null;
+            const apellido = decodeURIComponent(escape(decodedPayload.lastName));
+            return { nombre, apellido };
         } catch (error) {
             console.error("Error al decodificar el token:", error);
             return null;
@@ -28,15 +30,18 @@ export default function Header() {
         const token = sessionStorage.getItem("token");
         setIsLoggedIn(!!token);
         if (token) {
-            const nombre = obtenerNombreDesdeToken();
-            setUserName(nombre || "Usuario");
+            const datosUsuario = obtenerDatosUsuarioDesdeToken();
+            if (datosUsuario) {
+                setUserName(datosUsuario.nombre || "Usuario");
+                setUserLastName(datosUsuario.apellido || "");
+            }
         }
     }, []);
 
     const handleLogout = () => {
         sessionStorage.removeItem("token");
         setIsLoggedIn(false);
-        window.location.reload();
+        window.location.href = "/";
     };
 
     const getLinkClass = (path) => (
@@ -75,7 +80,7 @@ export default function Header() {
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                             >
                                 <FaUserCircle className="text-2xl" />
-                                <span>{userName || "Usuario"}</span>
+                                <span>{userName} {userLastName}</span>
                                 <FaCaretDown className="text-xl" />
                             </button>
                             
@@ -84,7 +89,7 @@ export default function Header() {
                                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
                                     <div className="px-4 py-2 border-b border-gray-200">
                                         <p className="text-sm text-gray-500">Bienvenido</p>
-                                        <p className="font-semibold text-gray-800">{userName}</p>
+                                        <p className="font-semibold text-gray-800">{userName} {userLastName}</p>
                                     </div>
                                     <a
                                         href="/perfil"
