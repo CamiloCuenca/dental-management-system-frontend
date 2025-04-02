@@ -152,12 +152,13 @@ const FormularioCambiarContraseña = () => {
 
                         {/* Botones de acción */}
                         <div className="flex flex-col sm:flex-row justify-end gap-4 w-full max-w-md mt-4">
-                            <a href="/login" className="w-full sm:w-auto">
+                            <a href="#" onClick={() => window.history.back()} className="w-full sm:w-auto">
                                 <button type="button" className="w-full sm:w-auto px-6 py-2 text-lg sm:text-2xl rounded-md 
                                 bg-gray-400 hover:bg-gray-500 text-white">
                                     Cancelar
                                 </button>
                             </a>
+
                             <button
                                 type="submit"
                                 disabled={!isFormValid || cargando}

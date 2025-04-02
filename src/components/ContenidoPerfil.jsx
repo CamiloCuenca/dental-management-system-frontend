@@ -2,12 +2,12 @@ import React, { useState } from "react";
 
 const ContenidoPerfil = () => {
   const [formData, setFormData] = useState({
-    id: "",
-    firstName: "",
+    idNumber: "",
+    name: "",
     lastName: "",
+    phoneNumber: "",
     address: "",
     birthDate: "",
-    phone: "",
     email: ""
   });
 
@@ -35,13 +35,13 @@ const ContenidoPerfil = () => {
             Perfil de Usuario
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-lg text-gray-700">
-            <p><strong>Número de Identificación:</strong> {formData.id}</p>
-            <p><strong>Nombres:</strong> {formData.firstName}</p>
+            <p><strong>Número de identificación:</strong> {formData.idNumber}</p>
+            <p><strong>Nombres:</strong> {formData.name}</p>
             <p><strong>Apellidos:</strong> {formData.lastName}</p>
+            <p><strong>Número de Teléfono:</strong> {formData.phoneNumber}</p>
             <p><strong>Dirección:</strong> {formData.address}</p>
-            <p><strong>Fecha de Nacimiento:</strong> {formData.birthDate}</p>
-            <p><strong>Número de Teléfono:</strong> {formData.phone}</p>
-            <p><strong>Correo Electrónico:</strong> {formData.email}</p>
+            <p><strong>Fecha de nacimiento:</strong> {formData.birthDate}</p>
+            <p><strong>Correo electrónico:</strong> {formData.email}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mt-6">
             <a href="/#">
@@ -49,7 +49,7 @@ const ContenidoPerfil = () => {
                 Actualizar Información
               </button>
             </a>
-            <a href="/#">
+            <a href="/cambiarContraseña">
               <button className="w-full px-6 py-3 text-xl sm:text-2xl rounded-md text-white bg-yellow-500 hover:bg-yellow-600 transition-all duration-300">
                 Actualizar Contraseña
               </button>
