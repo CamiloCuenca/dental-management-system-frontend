@@ -4,7 +4,8 @@ import Swal from 'sweetalert2';
 import imagenLogin from '../assets/imagenLogin.png';
 import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; 
+import api from "../services/api";
+import TokenService from '../services/tokenService';
 
 /**
  * Componente de formulario para iniciar sesión en la plataforma.
@@ -59,7 +60,9 @@ const FormularioLogin = () => {
     /**
      * Inicia sesión llamando a la API y guarda el token en la sesión.
      */
-    const login = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
         if (!isButtonEnabled) return;
 
         try {
@@ -70,7 +73,7 @@ const FormularioLogin = () => {
                 headers: { "Content-Type": "application/json" }
             });
 
-            sessionStorage.setItem("token", response.data.token);
+            TokenService.setToken(response.data.token);
 
             // Mostrar alerta de éxito
             Swal.fire({
@@ -136,25 +139,19 @@ const FormularioLogin = () => {
 
                     {/* CAPTCHA */}
                     <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
-                    {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
 
                     {/* Mensaje de error */}
                     {mensajeError && <p className="text-red-500 text-sm">{mensajeError}</p>}
 
                     {/* Botón de Ingresar */}
                     <button
-                        className={`px-10 py-2 text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
+                        onClick={handleSubmit}
                         disabled={!isButtonEnabled}
-                        onClick={login}
+                        className={`w-full px-6 py-2 text-lg sm:text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
                     >
                         Ingresar
                     </button>
-
-                    <p className="font-semibold">
-                        ¿No tienes una cuenta? <a href="/registro" className="text-[var(--color-secondary)] hover:underline">Registrarse</a>
-                    </p>
                 </div>
-                <img src={imagenLogin} alt="" className='w-[450px] object-cover xl:rounded-tr-2xl xl:rounded-br-2xl xl:block hidden' />
             </div>
         </section>
     );

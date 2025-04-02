@@ -7,6 +7,7 @@ import Registro from './pages/registro';
 import ActivarCuenta from './pages/activarCuenta';
 import RecuperarContraseña from './pages/recuperarContraseña';
 import CambiarContraseña from './pages/cambiarContraseña';
+import CambiarContraseñaActual from './pages/cambiarContraseñaActual';
 import Perfil from './pages/perfil';
 import HistorialMedico from './pages/historialMedicoUsuario';
 import { Toaster } from 'react-hot-toast';
@@ -43,6 +44,9 @@ function App() {
 
         {/* Ruta para cambiar la contraseña */}
         <Route path="/cambiarContraseña" element={<CambiarContraseña />} />
+
+        {/* Ruta para cambiar la contraseña actual */}
+        <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
 
         {/* Ruta para el perfil */}
         <Route path="/perfil" element={<Perfil />} />

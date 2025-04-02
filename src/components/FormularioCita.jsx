@@ -2,32 +2,24 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../services/api';
+import TokenService from '../services/tokenService';
+import { useNavigate } from 'react-router-dom';
 
 const FormularioCita = () => {
     const [captchaValido, setCaptchaValido] = useState(false);
     const [pacienteId, setPacienteId] = useState('');
     const [tipoCita, setTipoCita] = useState('CONSULTA_GENERAL');
     const [otroTipoCita, setOtroTipoCita] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const obtenerIdUsuarioDesdeToken = () => {
-            const token = sessionStorage.getItem('token');
-            if (!token) return null;
-            try {
-                const payloadBase64 = token.split('.')[1];
-                const decodedPayload = JSON.parse(atob(payloadBase64));
-                return decodedPayload.idUser || null;
-            } catch (error) {
-                console.error("Error al decodificar el token:", error);
-                return null;
-            }
-        };
-
-        const idUsuario = obtenerIdUsuarioDesdeToken();
-        if (idUsuario) {
-            setPacienteId(idUsuario);
+        const userId = TokenService.getUserId();
+        if (!userId) {
+            navigate('/login');
+            return;
         }
-    }, []);
+        setPacienteId(userId);
+    }, [navigate]);
 
     const handleTipoCitaChange = (e) => {
         setTipoCita(e.target.value);

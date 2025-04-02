@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import TokenService from '../services/tokenService';
+import { useNavigate } from 'react-router-dom';
 
 const ContenidoPerfil = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     id: "",
     firstName: "",
@@ -10,6 +13,30 @@ const ContenidoPerfil = () => {
     phone: "",
     email: ""
   });
+
+  useEffect(() => {
+    // Verificar autenticación
+    if (!TokenService.isAuthenticated()) {
+      navigate('/login');
+      return;
+    }
+
+    // Obtener datos del usuario desde el token
+    const userId = TokenService.getUserId();
+    const email = TokenService.getEmail();
+    const fullName = TokenService.getFullName();
+
+    if (fullName) {
+      const [firstName, lastName] = fullName.split(' ');
+      setFormData(prev => ({
+        ...prev,
+        id: userId || "",
+        email: email || "",
+        firstName: firstName || "",
+        lastName: lastName || ""
+      }));
+    }
+  }, [navigate]);
 
   const handleUpdate = () => {
     console.log("Actualizar información", formData);
@@ -49,7 +76,7 @@ const ContenidoPerfil = () => {
                 Actualizar Información
               </button>
             </a>
-            <a href="/#">
+            <a href="/cambiarContraseñaActual">
               <button className="w-full px-6 py-3 text-xl sm:text-2xl rounded-md text-white bg-yellow-500 hover:bg-yellow-600 transition-all duration-300">
                 Actualizar Contraseña
               </button>

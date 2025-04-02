@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaBars, FaTimes, FaUserCircle, FaCaretDown } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
+import TokenService from '../services/tokenService';
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
@@ -10,36 +11,23 @@ export default function Header() {
     const [userLastName, setUserLastName] = useState("");
     const location = useLocation();
 
-    const obtenerDatosUsuarioDesdeToken = () => {
-        const token = sessionStorage.getItem('token');
-        if (!token) return null;
-        try {
-            const payloadBase64 = token.split('.')[1];
-            const decodedPayload = JSON.parse(atob(payloadBase64));
-            // Decodificar el nombre y apellido para manejar caracteres especiales
-            const nombre = decodeURIComponent(escape(decodedPayload.nombre));
-            const apellido = decodeURIComponent(escape(decodedPayload.lastName));
-            return { nombre, apellido };
-        } catch (error) {
-            console.error("Error al decodificar el token:", error);
-            return null;
-        }
-    };
-
     useEffect(() => {
-        const token = sessionStorage.getItem("token");
-        setIsLoggedIn(!!token);
-        if (token) {
-            const datosUsuario = obtenerDatosUsuarioDesdeToken();
-            if (datosUsuario) {
-                setUserName(datosUsuario.nombre || "Usuario");
-                setUserLastName(datosUsuario.apellido || "");
+        // Verificar si el usuario está autenticado
+        setIsLoggedIn(TokenService.isAuthenticated());
+        
+        if (TokenService.isAuthenticated()) {
+            // Obtener el nombre completo del usuario
+            const fullName = TokenService.getFullName();
+            if (fullName) {
+                const [nombre, apellido] = fullName.split(' ');
+                setUserName(nombre || "Usuario");
+                setUserLastName(apellido || "");
             }
         }
     }, []);
 
     const handleLogout = () => {
-        sessionStorage.removeItem("token");
+        TokenService.clearToken();
         setIsLoggedIn(false);
         window.location.href = "/";
     };
