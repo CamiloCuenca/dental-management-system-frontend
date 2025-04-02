@@ -124,10 +124,11 @@ const FormularioRegistro = () => {
             <div className="bg-white p-5 sm:p-7 rounded-2xl shadow-2xl w-full max-w-5xl relative">
                 <button
                     onClick={() => window.history.back()}
-                    className="absolute top-5 left-5 flex items-center gap-2 text-[var(--color-secondary)] hover:underline text-lg"
+                    className="absolute top-1 left-5 flex items-center gap-2 text-[var(--color-secondary)] hover:underline text-lg"
                 >
                     <FaArrowLeft /> Volver
                 </button>
+
 
                 <h1 className="text-3xl sm:text-4xl font-bold text-center mb-2.5 text-[var(--color-secondary)]">Crear una cuenta</h1>
                 <h4 className="text-lg sm:text-xl font-bold text-center mb-2.5 text-[var(--color-secondary)]">Es rápido y sencillo</h4>
