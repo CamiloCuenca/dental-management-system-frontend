@@ -67,32 +67,71 @@ const FormularioActualizarUsuario = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (cargando) return;
-
         setCargando(true);
 
         try {
-            await api.put(`/cuenta/usuario/${accountId}`, formData);
+            // Validar que al menos un campo haya sido modificado
+            if (!isFormValid()) {
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos vacíos',
+                    text: 'Debe modificar al menos un campo para actualizar su información.'
+                });
+                return;
+            }
 
+            // Validar formato de teléfono si se está actualizando
+            if (formData.phoneNumber && !formData.phoneNumber.match(/^\d{10}$/)) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'El número de teléfono debe contener exactamente 10 dígitos.'
+                });
+                return;
+            }
+
+            // Validar formato de email si se está actualizando
+            if (formData.email && !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Por favor, ingrese un email válido.'
+                });
+                return;
+            }
+
+            const response = await api.put(`/cuenta/usuario/${accountId}`, formData);
+
+            // Actualizar el token con la nueva información
+            if (response.data.token) {
+                TokenService.setToken(response.data.token);
+            }
+
+            // Mostrar mensaje de éxito
             await Swal.fire({
-                title: '¡Éxito!',
-                text: 'Tu información ha sido actualizada correctamente',
                 icon: 'success',
-                confirmButtonText: 'Aceptar'
+                title: '¡Éxito!',
+                text: response.data.message || 'Información actualizada correctamente',
+                timer: 2000,
+                showConfirmButton: false
             });
 
+            // Redirigir al perfil
             navigate('/perfil');
         } catch (error) {
             console.error('Error al actualizar usuario:', error);
-            Swal.fire({
-                title: 'Error',
-                text: error.response?.data?.message || 'Error al actualizar la información',
+            await Swal.fire({
                 icon: 'error',
-                confirmButtonText: 'Aceptar'
+                title: 'Error',
+                text: error.response?.data?.message || 'Error al actualizar la información del usuario'
             });
         } finally {
             setCargando(false);
         }
+    };
+
+    const isFormValid = () => {
+        return Object.values(formData).some(value => value !== "");
     };
 
     if (!accountId) return null;
