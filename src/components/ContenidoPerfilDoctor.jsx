@@ -42,12 +42,14 @@ const ContenidoPerfilDoctor = () => {
 
                     {/* Botones con distribución optimizada y sin contenido en dos líneas */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 w-full">
+                        <a href="/actualizarPerfil">
                         <button
                             onClick={handleUpdate}
                             className="w-full px-6 py-3 text-lg sm:text-xl rounded-md text-white bg-blue-500 hover:bg-blue-600 transition-all duration-300 whitespace-nowrap"
                         >
                             Actualizar Información
                         </button>
+                        </a>
                         
                         <a href="/cambiarContraseña">
                         <button

@@ -11,6 +11,7 @@ import CitasDoctor from './pages/citasDoctor';
 import Perfil from './pages/perfil';
 import PerfilDoctor from './pages/perfilDoctor';
 import HistorialMedico from './pages/historialMedicoUsuario';
+import ActualizarPerfil from './pages/actualizarPerfil';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -57,6 +58,9 @@ function App() {
 
         {/* Ruta para el historial médico */}
         <Route path="/historialMedicoUsuario" element={<HistorialMedico />} />
+
+        {/* Ruta para actualizar el perfil */}
+        <Route path="/actualizarPerfil" element={<ActualizarPerfil />} />
       </Routes>
     </Router>
   )
