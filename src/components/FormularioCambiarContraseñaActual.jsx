@@ -16,6 +16,7 @@ const PASSWORD_REQUIREMENTS = {
  */
 const PasswordInput = ({ 
   label, 
+  name,
   value, 
   onChange, 
   showPassword, 
@@ -28,6 +29,7 @@ const PasswordInput = ({
     <div className="relative">
       <input
         type={showPassword ? "text" : "password"}
+        name={name}
         className="text-base w-full rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)]"
         value={value}
         onChange={onChange}
@@ -69,12 +71,12 @@ const FormularioCambiarContraseñaActual = () => {
 
     // Obtener ID de cuenta desde el token
     useEffect(() => {
-        const accountId = TokenService.getAccountId();
-        if (!accountId) {
+        const id = TokenService.getAccountId();
+        if (!id) {
             navigate('/login');
             return;
         }
-        setAccountId(accountId);
+        setAccountId(id);
     }, [navigate]);
 
     // Handlers

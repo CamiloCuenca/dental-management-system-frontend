@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import TokenService from '../services/tokenService';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import Swal from 'sweetalert2';
 
 const ContenidoPerfil = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    id: "",
-    firstName: "",
+    idNumber: "",
+    name: "",
     lastName: "",
+    phoneNumber: "",
     address: "",
     birthDate: "",
-    phone: "",
     email: ""
   });
 
@@ -21,21 +23,40 @@ const ContenidoPerfil = () => {
       return;
     }
 
-    // Obtener datos del usuario desde el token
-    const userId = TokenService.getUserId();
-    const email = TokenService.getEmail();
-    const fullName = TokenService.getFullName();
-
-    if (fullName) {
-      const [firstName, lastName] = fullName.split(' ');
-      setFormData(prev => ({
-        ...prev,
-        id: userId || "",
-        email: email || "",
-        firstName: firstName || "",
-        lastName: lastName || ""
-      }));
+    // Obtener ID de la cuenta desde el token
+    const accountId = TokenService.getAccountId();
+    if (!accountId) {
+      navigate('/login');
+      return;
     }
+
+    // Obtener información del perfil
+    const obtenerPerfil = async () => {
+      try {
+        const response = await api.get(`/cuenta/perfil/${accountId}`);
+        const perfilData = response.data;
+        
+        setFormData({
+          idNumber: perfilData.idNumber || "",
+          name: perfilData.name || "",
+          lastName: perfilData.lastName || "",
+          phoneNumber: perfilData.phoneNumber || "",
+          address: perfilData.address || "",
+          birthDate: perfilData.birthDate ? new Date(perfilData.birthDate).toLocaleDateString() : "",
+          email: perfilData.email || ""
+        });
+      } catch (error) {
+        console.error('Error al obtener el perfil:', error);
+        Swal.fire({
+          title: 'Error',
+          text: error.response?.data?.message || 'No se pudo cargar la información del perfil',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+      }
+    };
+
+    obtenerPerfil();
   }, [navigate]);
 
   const handleUpdate = () => {
@@ -62,12 +83,12 @@ const ContenidoPerfil = () => {
             Perfil de Usuario
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-lg text-gray-700">
-            <p><strong>Número de Identificación:</strong> {formData.id}</p>
-            <p><strong>Nombres:</strong> {formData.firstName}</p>
+            <p><strong>Número de Identificación:</strong> {formData.idNumber}</p>
+            <p><strong>Nombres:</strong> {formData.name}</p>
             <p><strong>Apellidos:</strong> {formData.lastName}</p>
-            <p><strong>Dirección:</strong> {formData.address}</p>
-            <p><strong>Fecha de Nacimiento:</strong> {formData.birthDate}</p>
-            <p><strong>Número de Teléfono:</strong> {formData.phone}</p>
+            <p><strong>Dirección:</strong> {formData.address || "No especificada"}</p>
+            <p><strong>Fecha de Nacimiento:</strong> {formData.birthDate || "No especificada"}</p>
+            <p><strong>Número de Teléfono:</strong> {formData.phoneNumber || "No especificado"}</p>
             <p><strong>Correo Electrónico:</strong> {formData.email}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mt-6">

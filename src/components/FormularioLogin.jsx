@@ -145,13 +145,18 @@ const FormularioLogin = () => {
 
                     {/* Botón de Ingresar */}
                     <button
-                        onClick={handleSubmit}
+                        className={`px-10 py-2 text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
                         disabled={!isButtonEnabled}
-                        className={`w-full px-6 py-2 text-lg sm:text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
+                        onClick={handleSubmit}
                     >
                         Ingresar
                     </button>
+
+                    <p className="font-semibold">
+                        ¿No tienes una cuenta? <a href="/registro" className="text-[var(--color-secondary)] hover:underline">Registrarse</a>
+                    </p>
                 </div>
+                <img src={imagenLogin} alt="" className='w-[450px] object-cover xl:rounded-tr-2xl xl:rounded-br-2xl xl:block hidden' />
             </div>
         </section>
     );
