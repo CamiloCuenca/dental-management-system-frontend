@@ -7,11 +7,11 @@ import Registro from './pages/registro';
 import ActivarCuenta from './pages/activarCuenta';
 import RecuperarContraseña from './pages/recuperarContraseña';
 import CambiarContraseña from './pages/cambiarContraseña';
-import CitasDoctor from './pages/citasDoctor';
+import CambiarContraseñaActual from './pages/cambiarContraseñaActual';
 import Perfil from './pages/perfil';
 import PerfilDoctor from './pages/perfilDoctor';
 import HistorialMedico from './pages/historialMedicoUsuario';
-import ActualizarPerfil from './pages/actualizarPerfil';
+import ActualizarUsuario from './pages/actualizarUsuario';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -47,6 +47,12 @@ function App() {
         {/* Ruta para cambiar la contraseña */}
         <Route path="/cambiarContraseña" element={<CambiarContraseña />} />
 
+        {/* Ruta para cambiar la contraseña actual */}
+        <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
+
+        {/* Ruta para cambiar la contraseña actual */}
+        <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
+
         {/* Ruta para citas del doctor */}
         <Route path="/citasDoctor" element={<CitasDoctor />} />
 
@@ -59,8 +65,8 @@ function App() {
         {/* Ruta para el historial médico */}
         <Route path="/historialMedicoUsuario" element={<HistorialMedico />} />
 
-        {/* Ruta para actualizar el perfil */}
-        <Route path="/actualizarPerfil" element={<ActualizarPerfil />} />
+        {/* Ruta para actualizar el usuario */}
+        <Route path="/actualizarUsuario" element={<ActualizarUsuario />} />
       </Routes>
     </Router>
   )

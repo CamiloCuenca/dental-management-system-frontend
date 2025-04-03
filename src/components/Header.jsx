@@ -1,21 +1,35 @@
 import { useState, useEffect } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaUserCircle, FaCaretDown } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
+import TokenService from '../services/tokenService';
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [userName, setUserName] = useState("");
+    const [userLastName, setUserLastName] = useState("");
     const location = useLocation();
 
     useEffect(() => {
-        const token = sessionStorage.getItem("token");
-        setIsLoggedIn(!!token);
+        // Verificar si el usuario está autenticado
+        setIsLoggedIn(TokenService.isAuthenticated());
+        
+        if (TokenService.isAuthenticated()) {
+            // Obtener el nombre completo del usuario
+            const fullName = TokenService.getFullName();
+            if (fullName) {
+                const [nombre, apellido] = fullName.split(' ');
+                setUserName(nombre || "Usuario");
+                setUserLastName(apellido || "");
+            }
+        }
     }, []);
 
     const handleLogout = () => {
-        sessionStorage.removeItem("token");
+        TokenService.clearToken();
         setIsLoggedIn(false);
-        window.location.reload();
+        window.location.href = "/";
     };
 
     const getLinkClass = (path) => (
@@ -48,13 +62,37 @@ export default function Header() {
                 {/* Botones de usuario */}
                 <ul className="hidden md:flex space-x-6 text-xl">
                     {isLoggedIn ? (
-                        <li>
+                        <li className="relative">
                             <button
-                                className="text-red-500 hover:text-red-700 font-semibold transition-all duration-300"
-                                onClick={handleLogout}
+                                className="flex items-center space-x-2 text-white hover:text-accent transition-all duration-300"
+                                onClick={() => setIsProfileOpen(!isProfileOpen)}
                             >
-                                Cerrar sesión
+                                <FaUserCircle className="text-2xl" />
+                                <span>{userName} {userLastName}</span>
+                                <FaCaretDown className="text-xl" />
                             </button>
+                            
+                            {/* Menú desplegable */}
+                            {isProfileOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
+                                    <div className="px-4 py-2 border-b border-gray-200">
+                                        <p className="text-sm text-gray-500">Bienvenido</p>
+                                        <p className="font-semibold text-gray-800">{userName} {userLastName}</p>
+                                    </div>
+                                    <a
+                                        href="/perfil"
+                                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-all duration-300"
+                                    >
+                                        Contenido del Perfil
+                                    </a>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100 transition-all duration-300"
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </div>
+                            )}
                         </li>
                     ) : (
                         <>
@@ -86,12 +124,20 @@ export default function Header() {
                         </a>
                     ))}
                     {isLoggedIn && (
-                        <button
-                            className="block text-xl font-semibold text-red-500 hover:text-red-700 transition-all duration-300"
-                            onClick={handleLogout}
-                        >
-                            Cerrar sesión
-                        </button>
+                        <>
+                            <a
+                                href="/perfil"
+                                className="block text-xl font-semibold hover:text-accent transition-all duration-300"
+                            >
+                                Contenido del Perfil
+                            </a>
+                            <button
+                                className="block text-xl font-semibold text-red-500 hover:text-red-700 transition-all duration-300"
+                                onClick={handleLogout}
+                            >
+                                Cerrar sesión
+                            </button>
+                        </>
                     )}
                 </div>
             )}
