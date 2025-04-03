@@ -9,6 +9,7 @@ import RecuperarContraseña from './pages/recuperarContraseña';
 import CambiarContraseña from './pages/cambiarContraseña';
 import CambiarContraseñaActual from './pages/cambiarContraseñaActual';
 import Perfil from './pages/perfil';
+import PerfilDoctor from './pages/perfilDoctor';
 import HistorialMedico from './pages/historialMedicoUsuario';
 import ActualizarUsuario from './pages/actualizarUsuario';
 import { Toaster } from 'react-hot-toast';
@@ -49,8 +50,17 @@ function App() {
         {/* Ruta para cambiar la contraseña actual */}
         <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
 
-        {/* Ruta para el perfil */}
+        {/* Ruta para cambiar la contraseña actual */}
+        <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
+
+        {/* Ruta para citas del doctor */}
+        <Route path="/citasDoctor" element={<CitasDoctor />} />
+
+        {/* Ruta para el perfil del usuario */}
         <Route path="/perfil" element={<Perfil />} />
+
+        {/* Ruta para el perfil del doctor*/}
+        <Route path="/perfilDoctor" element={<PerfilDoctor />} />
 
         {/* Ruta para el historial médico */}
         <Route path="/historialMedicoUsuario" element={<HistorialMedico />} />
