@@ -9,10 +9,7 @@ const ContenidoPerfil = () => {
   const [formData, setFormData] = useState({
     idNumber: "",
     name: "",
-    idNumber: "",
-    name: "",
     lastName: "",
-    phoneNumber: "",
     phoneNumber: "",
     address: "",
     birthDate: "",

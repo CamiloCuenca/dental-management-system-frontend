@@ -53,9 +53,6 @@ function App() {
         {/* Ruta para cambiar la contraseña actual */}
         <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
 
-        {/* Ruta para citas del doctor */}
-        <Route path="/citasDoctor" element={<CitasDoctor />} />
-
         {/* Ruta para el perfil del usuario */}
         <Route path="/perfil" element={<Perfil />} />
 
