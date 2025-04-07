@@ -6,6 +6,8 @@ import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import TokenService from '../services/tokenService';
+import { jwtDecode } from 'jwt-decode';
+
 
 /**
  * Componente de formulario para iniciar sesión en la plataforma.
@@ -26,40 +28,22 @@ const FormularioLogin = () => {
     const [mensajeError, setMensajeError] = useState('');
     const navigate = useNavigate(); 
 
-    /**
-     * Alterna la visibilidad de la contraseña.
-     */
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-    /**
-     * Maneja el cambio en el CAPTCHA.
-     * @param {string} value - Valor del CAPTCHA.
-     */
     const onChangeCaptcha = (value) => {
         setCaptchaValido(!!value);
     };
 
-    /**
-     * Maneja el cambio en el campo de usuario.
-     * @param {React.ChangeEvent<HTMLInputElement>} e - Evento del input.
-     */
     const handleUsuarioChange = (e) => {
         setUsuario(e.target.value);
     };
 
-    /**
-     * Maneja el cambio en el campo de contraseña.
-     * @param {React.ChangeEvent<HTMLInputElement>} e - Evento del input.
-     */
     const handleContrasenaChange = (e) => {
         setContrasena(e.target.value);
     };
 
     const isButtonEnabled = usuario.trim() !== '' && contrasena.trim() !== '' && captchaValido;
 
-    /**
-     * Inicia sesión llamando a la API y guarda el token en la sesión.
-     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -75,14 +59,22 @@ const FormularioLogin = () => {
 
             TokenService.setToken(response.data.token);
 
-            // Mostrar alerta de éxito
+            const decodedToken = jwtDecode(response.data.token);
+            const rol = decodedToken.role;
+
             Swal.fire({
                 title: "Inicio de sesión exitoso",
                 text: "Bienvenido a la plataforma",
                 icon: "success",
                 confirmButtonText: "Aceptar"
             }).then(() => {
-                navigate("/"); 
+                if (rol === "PACIENTE") {
+                    navigate("/");
+                } else if (rol === "DOCTOR") {
+                    navigate("/homeDoctor");
+                } else {
+                    navigate("/");
+                }
             });
 
         } catch (error) {
@@ -163,6 +155,3 @@ const FormularioLogin = () => {
 };
 
 export default FormularioLogin;
-
-
-
