@@ -12,7 +12,11 @@ import Perfil from './pages/perfil';
 import PerfilDoctor from './pages/perfilDoctor';
 import HistorialMedico from './pages/historialMedicoUsuario';
 import ActualizarUsuario from './pages/actualizarUsuario';
+import HomeDoctor from './pages/HomeDoctor';
 import { Toaster } from 'react-hot-toast';
+import CitasDoctor from './components/tablaCitasDoctor';
+import FormularioHistorial from './components/FormularioHistorial';
+
 
 function App() {
   return (
@@ -64,6 +68,14 @@ function App() {
 
         {/* Ruta para actualizar el usuario */}
         <Route path="/actualizarUsuario" element={<ActualizarUsuario />} />
+
+        <Route path="/homeDoctor" element={<HomeDoctor/>} />
+        <Route path="/citasDoctor" element={<CitasDoctor/>} />
+        <Route path="/formularioHistorial" element={<FormularioHistorial/>} />
+
+        {/* Ruta no encontrada (404) */}  
+
+        
       </Routes>
     </Router>
   )
