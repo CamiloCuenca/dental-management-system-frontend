@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TokenService from '../services/TokenService'; // Asegúrate que esté bien importado
+import TokenService from '../services/tokenService'; 
 
 const FormularioHistorial = ({ onSubmit }) => {
     const navigate = useNavigate();
