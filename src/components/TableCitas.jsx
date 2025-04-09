@@ -4,14 +4,16 @@ import api from "../services/api";
 import { toast } from "react-hot-toast";
 
 const columns = [
-  { key: "idCita", label: "ID Cita" },
-  { key: "idPaciente", label: "ID Paciente" },
-  { key: "idDoctor", label: "ID Doctor" },
+  { key: "id", label: "ID Cita" },
+  { key: "pacienteId", label: "ID Paciente" },
+  { key: "doctorId", label: "ID Doctor" },
+  { key: "doctorNombre", label: "Doctor" },
   { key: "fechaHora", label: "Fecha" },
   { key: "estado", label: "Estado Cita" },
-  { key: "tipoCita", label: "Tipo de Cita" },
+  { key: "tipoCitaNombre", label: "Tipo de Cita" },
   { key: "acciones", label: "Acciones" },
 ];
+
 
 const opcionesTipoCita = [
   "CONSULTA_GENERAL",
@@ -53,6 +55,7 @@ export default function TableCitas() {
           minute: "2-digit",
         }),
       }));
+      
       setCitas(citasFormateadas);
       sessionStorage.setItem("idPaciente", idPaciente);
     } catch (error) {
@@ -80,14 +83,16 @@ export default function TableCitas() {
   };
 
   const handleEdit = (cita) => {
-    setEditandoId(cita.idCita);
+    setEditandoId(cita.id);
   };
-
+  
   const handleTipoCitaChange = async (idCita, nuevoTipoCita) => {
     try {
-      await api.put(`/citas/editar/${idCita}`, null, { params: { nuevoTipoCita } });
+      await api.put(`/citas/editar/${idCita}`, null, {
+        params: { nuevoTipoCita },
+      });
       setCitas((prevCitas) =>
-        prevCitas.map((c) => (c.idCita === idCita ? { ...c, tipoCita: nuevoTipoCita } : c))
+        prevCitas.map((c) => (c.id === idCita ? { ...c, tipoCitaNombre: nuevoTipoCita } : c))
       );
       setEditandoId(null);
       toast.success("Cita actualizada correctamente.");
@@ -96,13 +101,15 @@ export default function TableCitas() {
       toast.error("Ocurrió un error al actualizar la cita.");
     }
   };
-
+  
   const handleDelete = async (cita) => {
     if (window.confirm("¿Seguro que quieres cancelar esta cita?")) {
       try {
-        await api.put(`/citas/cancelar/${cita.idCita}`);
+        await api.put(`/citas/cancelar/${cita.id}`);
         setCitas((prevCitas) =>
-          prevCitas.map((c) => (c.idCita === cita.idCita ? { ...c, estado: "CANCELADA" } : c))
+          prevCitas.map((c) =>
+            c.id === cita.id ? { ...c, estado: "CANCELADA" } : c
+          )
         );
         toast.success("Cita cancelada correctamente.");
       } catch (error) {
@@ -111,6 +118,7 @@ export default function TableCitas() {
       }
     }
   };
+  
 
   return (
     <div className="p-6 bg-grayLight min-h-screen flex flex-col items-center">
