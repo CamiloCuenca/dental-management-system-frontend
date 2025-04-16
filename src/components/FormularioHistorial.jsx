@@ -1,12 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import TokenService from '../services/tokenService'; 
-
-const FormularioHistorial = ({ onSubmit }) => {
-    const navigate = useNavigate();
-    const [userId, setUserId] = useState(null);
-
-
 import { useNavigate, useLocation } from 'react-router-dom';
 import TokenService from '../services/tokenService'; 
 import api from "../services/api";
@@ -28,13 +20,6 @@ const FormularioHistorial = ({ onSubmit }) => {
     });
 
     useEffect(() => {
-        if (!TokenService.isAuthenticated()) {
-            navigate('/login');
-            return;
-        }
-        const id = TokenService.getUserId();
-        if (!id) {
-
         // Validar autenticación
         const id = TokenService.getUserId();
         if (!TokenService.isAuthenticated() || !id) {
@@ -42,8 +27,6 @@ const FormularioHistorial = ({ onSubmit }) => {
             return;
         }
         setUserId(id);
-    }, [navigate]);
-
 
         // Si location.state trae datos, llenar los campos
         if (location.state) {
@@ -67,8 +50,6 @@ const FormularioHistorial = ({ onSubmit }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (onSubmit) onSubmit(formulario);
-
         try {
             const response = await api.post('/historiales/crear', formulario);
             console.log("✅ Historial creado:", response.data);
