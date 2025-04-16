@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Table from "./Table";
 import api from "../services/api";
 import { toast } from "react-hot-toast";
@@ -15,6 +15,7 @@ const columns = [
 ];
 
 
+
 const opcionesTipoCita = [
   "CONSULTA_GENERAL",
   "LIMPIEZA_DENTAL",
@@ -26,6 +27,7 @@ const opcionesTipoCita = [
   "OTRO",
 ];
 
+
 export default function TableCitas() {
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,17 +36,32 @@ export default function TableCitas() {
 
   useEffect(() => {
     const storedId = sessionStorage.getItem("idPaciente");
-    if (storedId) setIdPaciente(storedId);
-  }, []);
-
-  const buscarCitas = async () => {
-    if (!idPaciente.trim()) {
-      toast.error("Por favor, ingrese un ID de paciente válido.");
-      return;
+    if (storedId) {
+      setIdPaciente(storedId);
+      buscarCitasConId(storedId);
     }
+
+    // Agregar un listener para el evento 'cita-creada'
+    const handleCitaCreada = () => {
+      // Re-cargar las citas cada vez que se cree una nueva cita
+      if (idPaciente) {
+        buscarCitasConId(idPaciente);
+      }
+    };
+
+    // Escuchar el evento 'cita-creada'
+    window.addEventListener("cita-creada", handleCitaCreada);
+
+    // Limpiar el evento al desmontar el componente
+    return () => {
+      window.removeEventListener("cita-creada", handleCitaCreada);
+    };
+  }, [idPaciente]);
+
+  const buscarCitasConId = async (id) => {
     setLoading(true);
     try {
-      const response = await api.get(`/citas/paciente/${idPaciente}`);
+      const response = await api.get(`/citas/paciente/${id}`);
       const citasFormateadas = response.data.map((cita) => ({
         ...cita,
         fechaHora: new Date(cita.fechaHora).toLocaleString("es-ES", {
@@ -57,7 +74,7 @@ export default function TableCitas() {
       }));
       
       setCitas(citasFormateadas);
-      sessionStorage.setItem("idPaciente", idPaciente);
+      sessionStorage.setItem("idPaciente", id);
     } catch (error) {
       console.error("Error al obtener citas:", error);
       toast.error("No se pudieron cargar las citas.");
@@ -92,7 +109,13 @@ export default function TableCitas() {
         params: { nuevoTipoCita },
       });
       setCitas((prevCitas) =>
+
+        prevCitas.map((c) =>
+          c.id === idCita ? { ...c, tipoCitaNombre: nuevoTipoCita } : c
+        )
+
         prevCitas.map((c) => (c.id === idCita ? { ...c, tipoCitaNombre: nuevoTipoCita } : c))
+
       );
       setEditandoId(null);
       toast.success("Cita actualizada correctamente.");
@@ -121,36 +144,28 @@ export default function TableCitas() {
   
 
   return (
-    <div className="p-6 bg-grayLight min-h-screen flex flex-col items-center">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-7xl h-[85vh] flex flex-col">
-        <h2 className="text-2xl font-bold text-secondary mb-4 text-center">
+    <div className="min-h-screen bg-white p-8 flex flex-col items-center">
+      <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-7xl h-[85vh] flex flex-col transition-all duration-300 ease-in-out">
+        <h2 className="text-3xl font-extrabold text-primary text-center mb-6 tracking-wide">
           🦷 Consulta tus Citas 🦷
         </h2>
-        <div className="flex flex-col sm:flex-row gap-4 items-center mb-4">
-          <input
-            type="text"
-            value={idPaciente}
-            onChange={(e) => setIdPaciente(e.target.value)}
-            placeholder="Ingrese su ID"
-            className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-          <button
-            onClick={buscarCitas}
-            disabled={loading}
-            className={`px-6 py-3 rounded-lg font-semibold shadow-md transition ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-primary text-white hover:bg-secondary"}`}
-          >
-            {loading ? "Buscando..." : "Buscar"}
-          </button>
+
+        <div className="flex flex-col sm:flex-row gap-4 items-center mb-6">
         </div>
-        <div className="flex-1 overflow-y-auto">
+
+        <div className="flex-1 overflow-y-auto rounded-xl border border-gray-200 shadow-inner">
           {loading ? (
-            <p className="text-secondary text-center">Cargando citas...</p>
+            <p className="text-secondary text-center py-6">Cargando citas...</p>
           ) : (
             <Table
               columns={columns}
               data={citas.map((row) => ({
                 ...row,
-                estado: <span className={getEstadoClass(row.estado)}>{row.estado}</span>,
+                estado: (
+                  <span className={`${getEstadoClass(row.estado)} font-medium shadow px-3 py-1 inline-block`}>
+                    {row.estado}
+                  </span>
+                ),
               }))}
               onEdit={handleEdit}
               onDelete={handleDelete}

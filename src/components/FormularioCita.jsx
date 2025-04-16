@@ -294,6 +294,8 @@ const FormularioCita = () => {
                     TokenService.setAppointmentId(response.data.id);
                 }
 
+                window.dispatchEvent(new Event("cita-creada"));
+
                 await Swal.fire({
                     icon: 'success',
                     title: '¡Éxito!',
@@ -337,22 +339,26 @@ const FormularioCita = () => {
     };
 
     return (
-        <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-r from-[var(--color-primary)] from-10% via-[var(--color-secondary)] via-50% to-[var(--color-accent)] to-100%">
-            <div className="flex shadow-2xl w-full max-w-2xl">
-                <div className="flex flex-col items-center justify-center text-center p-10 sm:p-16 gap-6 sm:gap-8 bg-white rounded-2xl xl:rounded-tr-2xl xl:rounded-br-2xl w-full">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-secondary)]">
+        <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-blanco-100">
+            <div className="bg-white border-2 border-pink-200 rounded-3xl shadow-lg shadow-pink-100/30 p-6 sm:p-10 w-full max-w-3xl transition-all duration-300">
+                <div className="flex flex-col items-center text-center gap-6">
+                    <h1 className="text-4xl sm:text-4xl font-extrabold text-gray-800 tracking-tight bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] bg-clip-text text-transparent">
                         Crear Nueva Cita
-                        <hr className="border-t border-gray-600 my-4" />
                     </h1>
+                    <hr className="w-16 border-t-4 border-gray-300 rounded-full mb-2" />
 
-                    <form onSubmit={handleSubmit} className="flex flex-col text-lg gap-3 w-full max-w-md">
-                        <div className="mb-4">
-                            <label className="font-medium block mb-1">Tipo de Cita:</label>
+                    <form
+                        onSubmit={handleSubmit}
+                        className="flex flex-col text-base gap-6 w-full max-w-2xl"
+                    >
+                        {/* Tipo de Cita */}
+                        <div className="flex flex-col text-left gap-2">
+                            <label className="text-gray-700 font-medium">Tipo de Cita</label>
                             <select
                                 name="tipoCitaId"
                                 value={formData.tipoCitaId}
                                 onChange={handleChange}
-                                className="text-base w-full rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)]"
+                                className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] transition-all"
                                 required
                                 disabled={cargando}
                             >
@@ -364,19 +370,20 @@ const FormularioCita = () => {
                                 ))}
                             </select>
                             {formData.tipoCitaId && (
-                                <p className="text-sm text-gray-600 mt-2">
+                                <p className="text-sm text-gray-600">
                                     {tiposCita.find(t => t.id === parseInt(formData.tipoCitaId))?.descripcion}
                                 </p>
                             )}
                         </div>
 
-                        <div className="mb-4">
-                            <label className="font-medium block mb-1">Doctor:</label>
+                        {/* Doctor */}
+                        <div className="flex flex-col text-left gap-2">
+                            <label className="text-gray-700 font-medium">Doctor</label>
                             <select
                                 name="odontologoId"
                                 value={formData.odontologoId}
                                 onChange={handleChange}
-                                className="text-base w-full rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)]"
+                                className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"
                                 required
                                 disabled={cargando}
                             >
@@ -389,37 +396,41 @@ const FormularioCita = () => {
                             </select>
                         </div>
 
-                        <div className="mb-4">
-                            <label className="font-medium block mb-1">Fecha:</label>
-                            <Calendar
-                                onChange={handleFechaSeleccionada}
-                                value={fechaSeleccionada}
-                                minDate={new Date()}
-                                maxDate={new Date(new Date().setDate(new Date().getDate() + 30))}
-                                tileClassName={({ date }) => {
-                                    const fechaStr = date.toISOString().split('T')[0];
-                                    const fechaDisponible = fechasDisponibles.find(f =>
-                                        f.fecha.toISOString().split('T')[0] === fechaStr
-                                    );
-                                    return fechaDisponible ? 'fecha-disponible' : 'fecha-no-disponible';
-                                }}
-                                tileDisabled={({ date }) => {
-                                    const fechaStr = date.toISOString().split('T')[0];
-                                    return !fechasDisponibles.some(f =>
-                                        f.fecha.toISOString().split('T')[0] === fechaStr
-                                    );
-                                }}
-                            />
+                        {/* Fecha */}
+                        <div className="text-left">
+                            <label className="block text-gray-700 font-medium mb-2">Fecha</label>
+                            <div className="bg-white p-2 rounded-xl border border-gray-300">
+                                <Calendar
+                                    onChange={handleFechaSeleccionada}
+                                    value={fechaSeleccionada}
+                                    minDate={new Date()}
+                                    maxDate={new Date(new Date().setDate(new Date().getDate() + 30))}
+                                    tileClassName={({ date }) => {
+                                        const fechaStr = date.toISOString().split('T')[0];
+                                        const fechaDisponible = fechasDisponibles.find(f =>
+                                            f.fecha.toISOString().split('T')[0] === fechaStr
+                                        );
+                                        return fechaDisponible ? 'fecha-disponible' : 'fecha-no-disponible';
+                                    }}
+                                    tileDisabled={({ date }) => {
+                                        const fechaStr = date.toISOString().split('T')[0];
+                                        return !fechasDisponibles.some(f =>
+                                            f.fecha.toISOString().split('T')[0] === fechaStr
+                                        );
+                                    }}
+                                />
+                            </div>
                         </div>
 
+                        {/* Hora */}
                         {fechaSeleccionada && (
-                            <div className="mb-4">
-                                <label className="font-medium block mb-1">Hora:</label>
+                            <div className="flex flex-col text-left gap-2">
+                                <label className="text-gray-700 font-medium">Hora</label>
                                 <select
                                     name="hora"
                                     value={formData.hora}
                                     onChange={handleHoraSeleccionada}
-                                    className="text-base w-full rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)]"
+                                    className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"
                                     required
                                 >
                                     <option value="">Seleccione una hora</option>
@@ -438,11 +449,12 @@ const FormularioCita = () => {
                             </div>
                         )}
 
-                        <div className="flex flex-col sm:flex-row justify-end gap-4 w-full max-w-md mt-4">
+                        {/* Botones */}
+                        <div className="flex flex-col sm:flex-row justify-end gap-4 w-full mt-4">
                             <button
                                 type="button"
                                 onClick={() => navigate('/citas')}
-                                className="w-full sm:w-auto px-6 py-2 text-lg sm:text-xl rounded-md bg-gray-400 hover:bg-gray-500 text-white transition-colors"
+                                className="px-6 py-2 text-lg rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all"
                                 disabled={cargando}
                             >
                                 Cancelar
@@ -450,8 +462,14 @@ const FormularioCita = () => {
 
                             <button
                                 type="submit"
-                                disabled={cargando || !formData.odontologoId || !formData.fecha || !formData.hora || !formData.tipoCitaId}
-                                className="w-full sm:w-auto px-6 py-2 text-lg sm:text-xl rounded-md text-white bg-[var(--color-primary)] hover:bg-[var(--color-secondary)] transition-colors disabled:bg-gray-400"
+                                disabled={
+                                    cargando ||
+                                    !formData.odontologoId ||
+                                    !formData.fecha ||
+                                    !formData.hora ||
+                                    !formData.tipoCitaId
+                                }
+                                className="px-6 py-2 text-lg rounded-xl text-white bg-[var(--color-primary)] hover:bg-[var(--color-accent)] transition-all disabled:bg-gray-400"
                             >
                                 {cargando ? "Creando..." : "Crear Cita"}
                             </button>
