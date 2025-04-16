@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import Table from "./Table";
 import api from "../services/api";
 import { toast } from "react-hot-toast";
@@ -15,16 +15,8 @@ const columns = [
 ];
 
 
-const opcionesTipoCita = [
-  "CONSULTA_GENERAL",
-  "LIMPIEZA_DENTAL",
-  "EXTRACCION_DIENTES",
-  "TRATAMIENTO_DE_CONDUCTO",
-  "ORTODONCIA",
-  "IMPLANTES_DENTALES",
-  "BLANQUEAMIENTO_DENTAL",
-  "OTRO",
-];
+
+
 
 export default function TableCitas() {
   const [citas, setCitas] = useState([]);
