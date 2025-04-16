@@ -6,6 +6,16 @@ const FormularioHistorial = ({ onSubmit }) => {
     const navigate = useNavigate();
     const [userId, setUserId] = useState(null);
 
+
+import { useNavigate, useLocation } from 'react-router-dom';
+import TokenService from '../services/tokenService'; 
+import api from "../services/api";
+
+const FormularioHistorial = ({ onSubmit }) => {
+    const navigate = useNavigate();
+    const location = useLocation(); // <--- ESTE hook siempre al tope
+
+    const [userId, setUserId] = useState(null);
     const [formulario, setFormulario] = useState({
         pacienteId: '',
         odontologoId: '',
@@ -24,11 +34,29 @@ const FormularioHistorial = ({ onSubmit }) => {
         }
         const id = TokenService.getUserId();
         if (!id) {
+
+        // Validar autenticación
+        const id = TokenService.getUserId();
+        if (!TokenService.isAuthenticated() || !id) {
             navigate('/login');
             return;
         }
         setUserId(id);
     }, [navigate]);
+
+
+        // Si location.state trae datos, llenar los campos
+        if (location.state) {
+            const { pacienteId, odontologoId, citaId } = location.state;
+            setFormulario((prev) => ({
+                ...prev,
+                pacienteId: pacienteId || '',
+                odontologoId: odontologoId || '',
+                citaId: citaId || '',
+                fecha: new Date().toISOString().split('T')[0], // Fecha actual
+            }));
+        }
+    }, [navigate, location]);
 
     if (!userId) return null;
 
@@ -37,11 +65,20 @@ const FormularioHistorial = ({ onSubmit }) => {
         setFormulario({ ...formulario, [name]: value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (onSubmit) onSubmit(formulario);
-    };
 
+        try {
+            const response = await api.post('/historiales/crear', formulario);
+            console.log("✅ Historial creado:", response.data);
+            alert("Historial médico guardado con éxito");
+            navigate("/historiales");
+        } catch (error) {
+            console.error("❌ Error al crear historial:", error.response?.data || error.message);
+            alert("Error al guardar el historial");
+        }
+    };
     return (
         <form
             onSubmit={handleSubmit}

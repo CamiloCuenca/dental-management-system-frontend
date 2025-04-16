@@ -14,6 +14,20 @@ const columns = [
   { key: "acciones", label: "Acciones" },
 ];
 
+
+
+const opcionesTipoCita = [
+  "CONSULTA_GENERAL",
+  "LIMPIEZA_DENTAL",
+  "EXTRACCION_DIENTES",
+  "TRATAMIENTO_DE_CONDUCTO",
+  "ORTODONCIA",
+  "IMPLANTES_DENTALES",
+  "BLANQUEAMIENTO_DENTAL",
+  "OTRO",
+];
+
+
 export default function TableCitas() {
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -58,6 +72,7 @@ export default function TableCitas() {
           minute: "2-digit",
         }),
       }));
+      
       setCitas(citasFormateadas);
       sessionStorage.setItem("idPaciente", id);
     } catch (error) {
@@ -87,16 +102,20 @@ export default function TableCitas() {
   const handleEdit = (cita) => {
     setEditandoId(cita.id);
   };
-
+  
   const handleTipoCitaChange = async (idCita, nuevoTipoCita) => {
     try {
       await api.put(`/citas/editar/${idCita}`, null, {
         params: { nuevoTipoCita },
       });
       setCitas((prevCitas) =>
+
         prevCitas.map((c) =>
           c.id === idCita ? { ...c, tipoCitaNombre: nuevoTipoCita } : c
         )
+
+        prevCitas.map((c) => (c.id === idCita ? { ...c, tipoCitaNombre: nuevoTipoCita } : c))
+
       );
       setEditandoId(null);
       toast.success("Cita actualizada correctamente.");
@@ -105,7 +124,7 @@ export default function TableCitas() {
       toast.error("Ocurrió un error al actualizar la cita.");
     }
   };
-
+  
   const handleDelete = async (cita) => {
     if (window.confirm("¿Seguro que quieres cancelar esta cita?")) {
       try {
@@ -122,6 +141,7 @@ export default function TableCitas() {
       }
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-white p-8 flex flex-col items-center">
