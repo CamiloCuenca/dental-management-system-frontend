@@ -1,6 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import TokenService from '../services/tokenService';
 
 const HeroSeccion = () => {
+    const navigate = useNavigate();
+
+    const handleAgendarCita = () => {
+        if (TokenService.isAuthenticated()) {
+            navigate('/citas');
+        } else {
+            navigate('/agendar-cita');
+        }
+    };
+
     return (
         // Sección principal con un fondo degradado y diseño flexible
         <div className="bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] 
@@ -28,12 +40,12 @@ const HeroSeccion = () => {
 
                 {/* Botón para agendar cita */}
                 <div className="mt-5 flex flex-col md:flex-row md:space-x-4 space-y-3 md:space-y-0 items-center md:items-start">
-                    <a 
-                        href="/agendar-cita"
+                    <button 
+                        onClick={handleAgendarCita}
                         className="px-5 py-2.5 bg-white text-[var(--color-primary)] hover:bg-gray-200 text-lg font-semibold rounded shadow-md transition duration-300"
                     >
                         Agenda una Cita
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
