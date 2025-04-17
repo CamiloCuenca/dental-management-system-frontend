@@ -1,149 +1,483 @@
-import React, { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
-import api from '../services/api'; // Cliente Axios configurado para realizar peticiones HTTP
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import TokenService from '../services/tokenService';
+import Swal from 'sweetalert2';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import '../styles/FormularioCita.css';
 
 const FormularioCita = () => {
-    // Estados para manejar los datos del formulario
-    const [pacienteId, setPacienteId] = useState(''); // Guarda el ID del paciente
-    const [tipoCita, setTipoCita] = useState('CONSULTA_GENERAL'); // Guarda el tipo de cita seleccionada
-    const [otroTipoCita, setOtroTipoCita] = useState(''); // Guarda el tipo de cita personalizada si el usuario elige "OTRO"
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        pacienteId: "",
+        odontologoId: "",
+        fecha: "",
+        hora: "",
+        tipoCitaId: ""
+    });
+    const [cargando, setCargando] = useState(false);
+    const [doctores, setDoctores] = useState([]);
+    const [fechasDisponibles, setFechasDisponibles] = useState([]);
+    const [tiposCita, setTiposCita] = useState([]);
+    const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
 
-    // Función para extraer el ID del usuario desde el token almacenado en sessionStorage
-    const obtenerIdUsuarioDesdeToken = () => {
-        const token = sessionStorage.getItem('token'); // Obtener el token de sesión
-        if (!token) return null; // Si no hay token, retornar null
-
-        try {
-            const payloadBase64 = token.split('.')[1]; // Extraer la parte del payload del token JWT
-            const decodedPayload = JSON.parse(atob(payloadBase64)); // Decodificar la parte del payload de Base64 a JSON
-            return decodedPayload.idUser || null; // Retornar el ID del usuario si existe, sino retornar null
-        } catch (error) {
-            console.error("Error al decodificar el token:", error);
-            return null;
-        }
-    };
-
-    // Hook useEffect para establecer el pacienteId cuando se monta el componente
     useEffect(() => {
-        const idUsuario = obtenerIdUsuarioDesdeToken();
-        if (idUsuario) {
-            setPacienteId(idUsuario); // Si se obtiene el ID del usuario, se establece en el estado
-        }
-    }, []); // Se ejecuta solo una vez al montar el componente
-
-    // Manejar el cambio en el tipo de cita seleccionada
-    const handleTipoCitaChange = (e) => {
-        setTipoCita(e.target.value);
-        if (e.target.value !== 'OTRO') {
-            setOtroTipoCita(''); // Si el usuario no elige "OTRO", limpiar el campo de otroTipoCita
-        }
-    };
-
-    // Manejar el envío del formulario
-    const handleSubmit = async (e) => {
-        e.preventDefault(); // Evitar el comportamiento predeterminado del formulario
-
-        // Validación: Todos los campos son obligatorios
-        if (!pacienteId || (tipoCita === 'OTRO' && !otroTipoCita)) {
-            toast.error("⚠️ Todos los campos son obligatorios.");
+        if (!TokenService.isAuthenticated()) {
+            navigate('/login');
             return;
         }
 
-        // Construcción del objeto con los datos de la cita
-        const citaData = {
+        const id = TokenService.getAccountId();
+        if (!id) {
+            navigate('/login');
+            return;
+        }
 
-            idPaciente: parseInt(pacienteId, 10), // Convertir el ID del paciente a número entero
-            estado: "PENDIENTE", // Estado inicial de la cita
-            tipoCita: tipoCita === "OTRO" ? otroTipoCita.toUpperCase() : tipoCita // Si el tipo de cita es "OTRO", usar el valor personalizado
-
+        const obtenerDatosUsuario = async () => {
+            try {
+                const response = await api.get(`/cuenta/perfil/${id}`);
+                setFormData(prev => ({
+                    ...prev,
+                    pacienteId: response.data.idNumber
+                }));
+            } catch (error) {
+                console.error('Error al obtener datos del usuario:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron cargar los datos del usuario',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
         };
 
-        const toastId = toast.loading("⏳ Agendando cita..."); // Mostrar mensaje de carga mientras se procesa la solicitud
+        const obtenerTiposCita = async () => {
+            try {
+                const response = await api.get('/citas/tipos');
+                setTiposCita(response.data);
+            } catch (error) {
+                console.error('Error al obtener tipos de cita:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudieron cargar los tipos de cita',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        };
+
+        obtenerDatosUsuario();
+        obtenerTiposCita();
+    }, [navigate]);
+
+    const obtenerDoctoresPorEspecialidad = async (tipoCitaId) => {
+        try {
+            setCargando(true);
+            const response = await api.get(`/citas/doctores/${tipoCitaId}`);
+            setDoctores(response.data);
+        } catch (error) {
+            console.error('Error al obtener doctores:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudieron cargar los doctores',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+            setDoctores([]);
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    const obtenerFechasDisponibles = async (doctorId) => {
+        try {
+            console.log('=== Obteniendo fechas disponibles ===');
+            console.log('Doctor ID:', doctorId);
+
+            // Obtener la fecha actual y la fecha de fin (30 días después)
+            const fechaInicio = new Date();
+            const fechaFin = new Date();
+            fechaFin.setDate(fechaFin.getDate() + 30);
+
+            // Formatear fechas para la API
+            const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
+            const fechaFinStr = fechaFin.toISOString().split('T')[0];
+
+            console.log('Fecha inicio:', fechaInicioStr);
+            console.log('Fecha fin:', fechaFinStr);
+
+            const response = await api.get(`/citas/disponibilidad/fechas/${doctorId}`, {
+                params: {
+                    fechaInicio: fechaInicioStr,
+                    fechaFin: fechaFinStr
+                }
+            });
+
+            console.log('Respuesta del servidor:', response.data);
+
+            if (response.data && Array.isArray(response.data)) {
+                // Procesar las fechas disponibles según el DTO
+                const fechasProcesadas = response.data.map(fechaDTO => {
+                    // Convertir la fecha de LocalDate a Date
+                    const fecha = new Date(fechaDTO.fecha);
+
+                    // Procesar los horarios disponibles
+                    const horarios = fechaDTO.horarios.map(horarioDTO => ({
+                        hora: horarioDTO.hora,
+                        disponible: horarioDTO.disponible
+                    }));
+
+                    return {
+                        fecha: fecha,
+                        horarios: horarios,
+                        fechaFormateada: fecha.toLocaleDateString('es-ES', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                        })
+                    };
+                });
+
+                console.log('Fechas procesadas:', fechasProcesadas);
+                setFechasDisponibles(fechasProcesadas);
+            } else {
+                console.error('Formato de respuesta inesperado:', response.data);
+                setFechasDisponibles([]);
+            }
+        } catch (error) {
+            console.error('Error al obtener fechas disponibles:', error);
+            setFechasDisponibles([]);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron obtener las fechas disponibles. Por favor, intente nuevamente.'
+            });
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => {
+            const newData = {
+                ...prev,
+                [name]: value
+            };
+
+            // Si se cambia el tipo de cita, resetear doctor, fecha y hora
+            if (name === 'tipoCitaId') {
+                newData.odontologoId = "";
+                newData.fecha = "";
+                newData.hora = "";
+                setFechaSeleccionada(null);
+                setFechasDisponibles([]);
+                if (value) {
+                    obtenerDoctoresPorEspecialidad(value);
+                }
+            }
+
+            // Si se cambia el doctor, resetear fecha y hora
+            if (name === 'odontologoId') {
+                newData.fecha = "";
+                newData.hora = "";
+                setFechaSeleccionada(null);
+                setFechasDisponibles([]);
+                if (value) {
+                    obtenerFechasDisponibles(value);
+                }
+            }
+
+            // Si se cambia la fecha, resetear la hora
+            if (name === 'fecha') {
+                newData.hora = "";
+            }
+
+            return newData;
+        });
+    };
+
+    const handleFechaSeleccionada = (fecha) => {
+        if (!fecha) return;
+
+        // Verificar si la fecha está disponible
+        const fechaStr = fecha.toISOString().split('T')[0];
+        const fechaDisponible = fechasDisponibles.find(f =>
+            f.fecha.toISOString().split('T')[0] === fechaStr
+        );
+
+        if (fechaDisponible) {
+            setFechaSeleccionada(fecha);
+            setFormData(prev => ({
+                ...prev,
+                fecha: fechaStr,
+                hora: "" // Resetear la hora cuando se cambia la fecha
+            }));
+        } else {
+            // Si la fecha no está disponible, mostrar un mensaje
+            Swal.fire({
+                icon: 'warning',
+                title: 'Fecha no disponible',
+                text: 'Por favor, seleccione una fecha disponible del calendario.'
+            });
+        }
+    };
+
+    const handleHoraSeleccionada = (e) => {
+        const { value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            hora: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (cargando) return;
+
+        setCargando(true);
 
         try {
+            // Validar que todos los campos requeridos estén llenos
+            if (!formData.pacienteId || !formData.odontologoId || !formData.fecha || !formData.hora || !formData.tipoCitaId) {
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'Por favor, complete todos los campos requeridos.'
+                });
+                return;
+            }
 
-            await api.post("/citas/crear", citaData); // Enviar la solicitud POST al backend
-            toast.dismiss(toastId); // Ocultar mensaje de carga
-            toast.success("✅ Cita creada con éxito!"); // Mostrar mensaje de éxito
+            // Validar que la fecha no sea en el pasado
+            const fechaSeleccionada = new Date(`${formData.fecha}T${formData.hora}:00`);
+            if (fechaSeleccionada < new Date()) {
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Fecha inválida',
+                    text: 'No se pueden crear citas en fechas pasadas.'
+                });
+                return;
+            }
 
+            // Validar que la hora esté dentro del horario de trabajo (8:00 - 17:00)
+            const horaSeleccionada = parseInt(formData.hora.split(':')[0]);
+            if (horaSeleccionada < 8 || horaSeleccionada >= 17) {
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Hora inválida',
+                    text: 'Las citas deben ser entre las 8:00 y las 17:00.'
+                });
+                return;
+            }
 
-            // Limpiar el formulario después del envío exitoso (excepto el pacienteId)
-            setTipoCita('CONSULTA_GENERAL');
-            setOtroTipoCita('');
+            // Crear el DTO de la cita según la nueva estructura del backend
+            const citaDTO = {
+                pacienteId: formData.pacienteId,
+                doctorId: formData.odontologoId,
+                fecha: formData.fecha, // Formato: YYYY-MM-DD
+                hora: formData.hora,   // Formato: HH:mm
+                tipoCitaId: parseInt(formData.tipoCitaId)
+            };
+
+            console.log('Enviando citaDTO:', citaDTO);
+
+            // Realizar la petición al backend
+            const response = await api.post('/citas/crear', citaDTO, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 200) {
+                // Guardar el ID de la cita en el token
+                if (response.data && response.data.id) {
+                    TokenService.setAppointmentId(response.data.id);
+                }
+
+                window.dispatchEvent(new Event("cita-creada"));
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Cita creada correctamente',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                navigate('/citas');
+            }
         } catch (error) {
-            toast.dismiss(toastId); // Ocultar mensaje de carga en caso de error
-            toast.error("❌ Error al agendar la cita. Inténtalo de nuevo."); // Mostrar mensaje de error
+            console.error('Error al crear cita:', error);
+            console.error('Detalles del error:', error.response?.data);
+            console.error('Estado del error:', error.response?.status);
+            console.error('Headers del error:', error.response?.headers);
+
+            let mensajeError = 'Error al crear la cita';
+
+            // Manejar errores específicos del backend
+            if (error.response?.data) {
+                const errorData = error.response.data;
+
+                if (typeof errorData === 'string') {
+                    mensajeError = errorData;
+                } else if (errorData.message) {
+                    mensajeError = errorData.message;
+                } else if (errorData.error) {
+                    mensajeError = errorData.error;
+                }
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: mensajeError,
+                confirmButtonText: 'Aceptar'
+            });
+        } finally {
+            setCargando(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md space-y-6">
-            <h2 className="text-2xl font-bold text-center text-secondary">🦷 Agendar Cita Odontológica</h2>
+        <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-blanco-100">
+            <div className="bg-white border-2 border-pink-200 rounded-3xl shadow-lg shadow-pink-100/30 p-6 sm:p-10 w-full max-w-3xl transition-all duration-300">
+                <div className="flex flex-col items-center text-center gap-6">
+                    <h1 className="text-4xl sm:text-4xl font-extrabold text-gray-800 tracking-tight bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] bg-clip-text text-transparent">
+                        Crear Nueva Cita
+                    </h1>
+                    <hr className="w-16 border-t-4 border-gray-300 rounded-full mb-2" />
 
-            <div className="grid gap-4">
-                {/* Campo para el ID del paciente */}
-                <div>
-                    <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="pacienteId">
-                        Documento de identidad del paciente:
-                    </label>
-                    <input
-                        type="text"
-                        id="pacienteId"
-                        value={pacienteId}
-                        onChange={(e) => setPacienteId(e.target.value)}
-
-                        disabled={false}
-                        className="w-full p-2 border rounded-lg bg-gray-100 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
-                    />
-                </div>
-
-                {/* Selector del tipo de cita */}
-                <div>
-                    <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="tipoCita">Tipo de cita:</label>
-                    <select
-                        id="tipoCita"
-                        value={tipoCita}
-                        onChange={handleTipoCitaChange}
-                        required
-                        className="w-full p-2 border rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
+                    <form
+                        onSubmit={handleSubmit}
+                        className="flex flex-col text-base gap-6 w-full max-w-2xl"
                     >
-                        <option value="CONSULTA_GENERAL">Consulta General</option>
-                        <option value="LIMPIEZA_DENTAL">Limpieza Dental</option>
-                        <option value="EXTRACCION_DIENTES">Extracción de Dientes</option>
-                        <option value="TRATAMIENTO_DE_CONDUCTO">Tratamiento de Conducto</option>
-                        <option value="ORTODONCIA">Ortodoncia (Brackets)</option>
-                        <option value="IMPLANTES_DENTALES">Implantes Dentales</option>
-                        <option value="BLANQUEAMIENTO_DENTAL">Blanqueamiento Dental</option>
-                        <option value="OTRO">Otro</option>
-                    </select>
+                        {/* Tipo de Cita */}
+                        <div className="flex flex-col text-left gap-2">
+                            <label className="text-gray-700 font-medium">Tipo de Cita</label>
+                            <select
+                                name="tipoCitaId"
+                                value={formData.tipoCitaId}
+                                onChange={handleChange}
+                                className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] transition-all"
+                                required
+                                disabled={cargando}
+                            >
+                                <option value="">Seleccione el tipo de cita</option>
+                                {tiposCita.map(tipo => (
+                                    <option key={tipo.id} value={tipo.id}>
+                                        {tipo.nombre} - {tipo.duracionMinutos} min
+                                    </option>
+                                ))}
+                            </select>
+                            {formData.tipoCitaId && (
+                                <p className="text-sm text-gray-600">
+                                    {tiposCita.find(t => t.id === parseInt(formData.tipoCitaId))?.descripcion}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Doctor */}
+                        <div className="flex flex-col text-left gap-2">
+                            <label className="text-gray-700 font-medium">Doctor</label>
+                            <select
+                                name="odontologoId"
+                                value={formData.odontologoId}
+                                onChange={handleChange}
+                                className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"
+                                required
+                                disabled={cargando}
+                            >
+                                <option value="">Seleccione un doctor</option>
+                                {doctores.map(doctor => (
+                                    <option key={doctor.id} value={doctor.id}>
+                                        Dr. {doctor.nombre} {doctor.apellido} - {doctor.especialidad}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Fecha */}
+                        <div className="text-left">
+                            <label className="block text-gray-700 font-medium mb-2">Fecha</label>
+                            <div className="bg-white p-2 rounded-xl border border-gray-300">
+                                <Calendar
+                                    onChange={handleFechaSeleccionada}
+                                    value={fechaSeleccionada}
+                                    minDate={new Date()}
+                                    maxDate={new Date(new Date().setDate(new Date().getDate() + 30))}
+                                    tileClassName={({ date }) => {
+                                        const fechaStr = date.toISOString().split('T')[0];
+                                        const fechaDisponible = fechasDisponibles.find(f =>
+                                            f.fecha.toISOString().split('T')[0] === fechaStr
+                                        );
+                                        return fechaDisponible ? 'fecha-disponible' : 'fecha-no-disponible';
+                                    }}
+                                    tileDisabled={({ date }) => {
+                                        const fechaStr = date.toISOString().split('T')[0];
+                                        return !fechasDisponibles.some(f =>
+                                            f.fecha.toISOString().split('T')[0] === fechaStr
+                                        );
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Hora */}
+                        {fechaSeleccionada && (
+                            <div className="flex flex-col text-left gap-2">
+                                <label className="text-gray-700 font-medium">Hora</label>
+                                <select
+                                    name="hora"
+                                    value={formData.hora}
+                                    onChange={handleHoraSeleccionada}
+                                    className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"
+                                    required
+                                >
+                                    <option value="">Seleccione una hora</option>
+                                    {fechasDisponibles
+                                        .find(f =>
+                                            f.fecha.toISOString().split('T')[0] ===
+                                            fechaSeleccionada.toISOString().split('T')[0]
+                                        )?.horarios
+                                        .filter(h => h.disponible)
+                                        .map(hora => (
+                                            <option key={hora.hora} value={hora.hora}>
+                                                {hora.hora}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Botones */}
+                        <div className="flex flex-col sm:flex-row justify-end gap-4 w-full mt-4">
+                            <button
+                                type="button"
+                                onClick={() => navigate('/citas')}
+                                className="px-6 py-2 text-lg rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all"
+                                disabled={cargando}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="submit"
+                                disabled={
+                                    cargando ||
+                                    !formData.odontologoId ||
+                                    !formData.fecha ||
+                                    !formData.hora ||
+                                    !formData.tipoCitaId
+                                }
+                                className="px-6 py-2 text-lg rounded-xl text-white bg-[var(--color-primary)] hover:bg-[var(--color-accent)] transition-all disabled:bg-gray-400"
+                            >
+                                {cargando ? "Creando..." : "Crear Cita"}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                {/* Campo adicional si el usuario elige "Otro" */}
-                {tipoCita === 'OTRO' && (
-                    <div>
-                        <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor="otroTipoCita">
-                            Especificar otro tipo de cita:
-                        </label>
-                        <input
-                            type="text"
-                            id="otroTipoCita"
-                            value={otroTipoCita}
-                            onChange={(e) => setOtroTipoCita(e.target.value)}
-                            required
-                            className="w-full p-2 border rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
-                        />
-                    </div>
-                )}
             </div>
-
-            {/* Botón de enviar */}
-            <button
-                type="submit"
-                className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-secondary transition transform hover:scale-105"
-            >
-                Agendar Cita
-            </button>
-        </form>
+        </section>
     );
 };
 

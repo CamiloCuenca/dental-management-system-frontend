@@ -1,6 +1,7 @@
-import React from "react";
+import "react";
 
 // Componente Table: Muestra una tabla con datos dinámicos y opciones de edición y eliminación
+// eslint-disable-next-line react/prop-types
 const Table = ({ columns, data, onEdit, onDelete, editandoId, handleTipoCitaChange }) => {
   // Opciones disponibles para el tipo de cita
   const opcionesTipoCita = [
@@ -21,6 +22,7 @@ const Table = ({ columns, data, onEdit, onDelete, editandoId, handleTipoCitaChan
         {/* Encabezado de la tabla */}
         <thead className="bg-primary text-white">
           <tr>
+            {/* eslint-disable-next-line react/prop-types */}
             {columns.map((col) => (
               <th key={col.key} className="px-6 py-3 text-left uppercase font-semibold">
                 {col.label}
@@ -31,9 +33,12 @@ const Table = ({ columns, data, onEdit, onDelete, editandoId, handleTipoCitaChan
 
         {/* Cuerpo de la tabla */}
         <tbody>
+        {/* eslint-disable-next-line react/prop-types */}
           {data.length > 0 ? (
+              // eslint-disable-next-line react/prop-types
             data.map((row, rowIndex) => (
               <tr key={row.idCita} className={`border-b border-grayLight ${rowIndex % 2 === 0 ? "bg-grayLight" : "bg-white"}`}>
+                {/* eslint-disable-next-line react/prop-types */}
                 {columns.map((col) => (
                   <td key={`${row.idCita}-${col.key}`} className="px-6 py-4">
                     {/* Si la columna es tipoCita y está en edición, se muestra un select */}
@@ -74,11 +79,12 @@ const Table = ({ columns, data, onEdit, onDelete, editandoId, handleTipoCitaChan
           ) : (
             // Si no hay datos, muestra un mensaje indicando que no hay información disponible
             <tr>
+              {/* eslint-disable-next-line react/prop-types */}
               <td colSpan={columns.length} className="text-center py-6 text-secondary font-semibold">
                 No hay datos disponibles
               </td>
             </tr>
-          )}
+          )}  
         </tbody>
       </table>
     </div>

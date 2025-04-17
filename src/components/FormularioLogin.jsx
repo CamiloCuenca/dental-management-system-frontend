@@ -4,7 +4,10 @@ import Swal from 'sweetalert2';
 import imagenLogin from '../assets/imagenLogin.png';
 import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; 
+import api from "../services/api";
+import TokenService from '../services/tokenService';
+import { jwtDecode } from 'jwt-decode';
+
 
 /**
  * Componente de formulario para iniciar sesión en la plataforma.
@@ -25,41 +28,25 @@ const FormularioLogin = () => {
     const [mensajeError, setMensajeError] = useState('');
     const navigate = useNavigate(); 
 
-    /**
-     * Alterna la visibilidad de la contraseña.
-     */
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-    /**
-     * Maneja el cambio en el CAPTCHA.
-     * @param {string} value - Valor del CAPTCHA.
-     */
     const onChangeCaptcha = (value) => {
         setCaptchaValido(!!value);
     };
 
-    /**
-     * Maneja el cambio en el campo de usuario.
-     * @param {React.ChangeEvent<HTMLInputElement>} e - Evento del input.
-     */
     const handleUsuarioChange = (e) => {
         setUsuario(e.target.value);
     };
 
-    /**
-     * Maneja el cambio en el campo de contraseña.
-     * @param {React.ChangeEvent<HTMLInputElement>} e - Evento del input.
-     */
     const handleContrasenaChange = (e) => {
         setContrasena(e.target.value);
     };
 
     const isButtonEnabled = usuario.trim() !== '' && contrasena.trim() !== '' && captchaValido;
 
-    /**
-     * Inicia sesión llamando a la API y guarda el token en la sesión.
-     */
-    const login = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
         if (!isButtonEnabled) return;
 
         try {
@@ -70,16 +57,24 @@ const FormularioLogin = () => {
                 headers: { "Content-Type": "application/json" }
             });
 
-            sessionStorage.setItem("token", response.data.token);
+            TokenService.setToken(response.data.token);
 
-            // Mostrar alerta de éxito
+            const decodedToken = jwtDecode(response.data.token);
+            const rol = decodedToken.role;
+
             Swal.fire({
                 title: "Inicio de sesión exitoso",
                 text: "Bienvenido a la plataforma",
                 icon: "success",
                 confirmButtonText: "Aceptar"
             }).then(() => {
-                navigate("/"); 
+                if (rol === "PACIENTE") {
+                    navigate("/");
+                } else if (rol === "DOCTOR") {
+                    navigate("/homeDoctor");
+                } else {
+                    navigate("/");
+                }
             });
 
         } catch (error) {
@@ -136,7 +131,6 @@ const FormularioLogin = () => {
 
                     {/* CAPTCHA */}
                     <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
-                    {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
 
                     {/* Mensaje de error */}
                     {mensajeError && <p className="text-red-500 text-sm">{mensajeError}</p>}
@@ -145,7 +139,7 @@ const FormularioLogin = () => {
                     <button
                         className={`px-10 py-2 text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
                         disabled={!isButtonEnabled}
-                        onClick={login}
+                        onClick={handleSubmit}
                     >
                         Ingresar
                     </button>
@@ -161,6 +155,3 @@ const FormularioLogin = () => {
 };
 
 export default FormularioLogin;
-
-
-

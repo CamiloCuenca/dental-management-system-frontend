@@ -1,65 +1,167 @@
-import { useState, useEffect } from "react"; // Importamos React y los hooks useState y useEffect
-import { FaBars, FaTimes } from "react-icons/fa"; // Importamos iconos de react-icons
+import { useState, useEffect } from "react";
+import { FaBars, FaTimes, FaUserCircle, FaCaretDown } from "react-icons/fa";
+import { useLocation, useNavigate } from "react-router-dom";
+import TokenService from '../services/tokenService';
 
 export default function Header() {
-    // Estado para controlar si el menú hamburguesa está abierto o cerrado
     const [isOpen, setIsOpen] = useState(false);
-    
-    // Estado para verificar si el usuario está autenticado
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [userName, setUserName] = useState("");
+    const [userLastName, setUserLastName] = useState("");
+    const [userRole, setUserRole] = useState("");
+    const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // Verificar si hay un token en sessionStorage
-        const token = sessionStorage.getItem("token");
-        setIsLoggedIn(!!token); // Si hay token, establece isLoggedIn en true, si no, en false
+        // Verificar si el usuario está autenticado
+        setIsLoggedIn(TokenService.isAuthenticated());
+        
+        if (TokenService.isAuthenticated()) {
+            // Obtener el nombre completo del usuario
+            const fullName = TokenService.getFullName();
+            if (fullName) {
+                const [nombre, apellido] = fullName.split(' ');
+                setUserName(nombre || "Usuario");
+                setUserLastName(apellido || "");
+            }
+            // Obtener el rol del usuario
+            const role = TokenService.getRole();
+            setUserRole(role);
+        }
     }, []);
 
     const handleLogout = () => {
-        sessionStorage.removeItem("token"); // Eliminar token de sessionStorage
-        setIsLoggedIn(false); // Actualizar el estado de autenticación
-        window.location.reload(); // Recargar la página para reflejar los cambios
+        TokenService.clearToken();
+        setIsLoggedIn(false);
+        window.location.href = "/";
     };
 
+    const handleNavigation = (path) => {
+        if (path === "/citas" && userRole === "DOCTOR") {
+            navigate("/homeDoctor");
+        } else {
+            navigate(path);
+        }
+    };
+
+    const getLinkClass = (path) => (
+        `relative text-lg font-semibold tracking-wide uppercase transition-all duration-300 ${location.pathname === path ? "text-primary" : "text-white hover:text-accent"}`
+    );
+
     return (
-        <header className="bg-secondary">
-            <nav className="text-white py-5 px-6">
-                <div className="flex justify-between items-center">
-                    {/* Nombre de la aplicación */}
-                    <h1 className="text-3xl font-bold">OdontoLogic</h1>
+        <header className="bg-secondary shadow-lg">
+            <nav className="text-white py-4 px-6 flex items-center justify-between">
 
-                    {/* Botón del menú hamburguesa para pantallas pequeñas */}
-                    <button 
-                        className="md:hidden text-3xl focus:outline-none"
-                        onClick={() => setIsOpen(!isOpen)} // Cambia el estado de isOpen al hacer clic
-                    >
-                        {isOpen ? <FaTimes /> : <FaBars />} {/* Alterna entre ícono de abrir y cerrar menú */}
-                    </button>
-                </div>
+                {/* Logo estilizado con efecto glow */}
+                <a href="/" className={getLinkClass("/")}>
+                    <h1 className="text-4xl font-extrabold text-white animate-pulse drop-shadow-[0_0_15px_rgba(215,47,139,0.7)] normal-case">
+                        Odonto<span className="text-primary">Logic</span>
+                    </h1>
+                </a>
 
-                {/* Menú de navegación */}
-                <ul className={`md:flex md:justify-center md:space-x-8 text-2xl mt-5 md:mt-0 transition-all duration-300 ${isOpen ? 'block' : 'hidden'} md:block`}>
-                    <li><a href="/" className="block md:inline hover:text-accent">Home</a></li>
-                    <li><a href="/citas" className="block md:inline hover:text-accent">Citas</a></li>
-
-                    {/* Si el usuario está autenticado, muestra la opción de cerrar sesión */}
-                    {isLoggedIn ? (
-                        <li>
-                            <button 
-                                className="block md:inline text-red-500 hover:text-red-700 font-semibold"
-                                onClick={handleLogout} // Llama a la función handleLogout al hacer clic
+                {/* Enlaces principales con subrayado animado */}
+                <ul className="hidden md:flex space-x-8 text-xl">
+                    {["/", "/citas", "/historialMedicoUsuario"].map((path, index) => (
+                        <li key={index} className="relative group">
+                            <button
+                                onClick={() => handleNavigation(path)}
+                                className={getLinkClass(path)}
                             >
-                                Cerrar sesión
+                                {path === "/" ? "Home" : path === "/citas" ? "Citas" : "Historiales Médicos"}
                             </button>
+                            <span className="absolute left-0 bottom-0 w-0 h-[3px] bg-accent transition-all duration-300 group-hover:w-full"></span>
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Botones de usuario */}
+                <ul className="hidden md:flex space-x-6 text-xl">
+                    {isLoggedIn ? (
+                        <li className="relative">
+                            <button
+                                className="flex items-center space-x-2 text-white hover:text-accent transition-all duration-300"
+                                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                            >
+                                <FaUserCircle className="text-2xl" />
+                                <span>{userRole === 'DOCTOR' ? 'Doctor ' : ''}{userName} {userLastName}</span>
+                                <FaCaretDown className="text-xl" />
+                            </button>
+                            
+                            {/* Menú desplegable */}
+                            {isProfileOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
+                                    <div className="px-4 py-2 border-b border-gray-200">
+                                        <p className="text-sm text-gray-500">Bienvenido</p>
+                                        <p className="font-semibold text-gray-800">{userRole === 'DOCTOR' ? 'Doctor ' : ''}{userName} {userLastName}</p>
+                                    </div>
+                                    <a
+                                        href="/perfil"
+                                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-all duration-300"
+                                    >
+                                        Contenido del Perfil
+                                    </a>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100 transition-all duration-300"
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </div>
+                            )}
                         </li>
                     ) : (
-                        // Si no está autenticado, muestra las opciones de inicio de sesión y registro
                         <>
-                            <li><a href="/login" className="block md:inline hover:text-accent">Iniciar sesión</a></li>
-                            <li><a href="/registro" className="block md:inline hover:text-accent">Registro</a></li>
+                            <li><a href="/login" className={getLinkClass("/login")}>Iniciar sesión</a></li>
+                            <li><a href="/registro" className={getLinkClass("/registro")}>Registro</a></li>
                         </>
                     )}
                 </ul>
+
+                {/* Menú hamburguesa para móviles */}
+                <button
+                    className="md:hidden text-3xl text-white focus:outline-none"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    {isOpen ? <FaTimes /> : <FaBars />}
+                </button>
             </nav>
+
+            {/* Menú móvil */}
+            {isOpen && (
+                <div className="md:hidden bg-secondary text-white py-4 px-6 space-y-4">
+                    {["Home", "Citas", "Historiales Médicos", "Iniciar sesión", "Registro"].map((text, index) => (
+                        <button
+                            key={index}
+                            onClick={() => handleNavigation(
+                                text === "Home" ? "/" : 
+                                text === "Citas" ? "/citas" : 
+                                text === "Historiales Médicos" ? "/historialMedicoUsuario" : 
+                                text === "Iniciar sesión" ? "/login" : "/registro"
+                            )}
+                            className="block text-xl font-semibold hover:text-accent transition-all duration-300"
+                        >
+                            {text}
+                        </button>
+                    ))}
+                    {isLoggedIn && (
+                        <>
+                            <a
+                                href="/perfil"
+                                className="block text-xl font-semibold hover:text-accent transition-all duration-300"
+                            >
+                                Contenido del Perfil
+                            </a>
+                            <button
+                                className="block text-xl font-semibold text-red-500 hover:text-red-700 transition-all duration-300"
+                                onClick={handleLogout}
+                            >
+                                Cerrar sesión
+                            </button>
+                        </>
+                    )}
+                </div>
+            )}
         </header>
     );
 }
