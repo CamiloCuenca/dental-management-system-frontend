@@ -24,27 +24,27 @@ const PasswordInput = ({
   error,
   placeholder 
 }) => (
-  <div className="mb-4">
-    <label className="font-medium block mb-1">{label}:</label>
-    <div className="relative">
+  <div className="mb-6">
+    <label className="block text-sm font-semibold text-[var(--color-secondary)] mb-2 tracking-wide">{label}</label>
+    <div className="relative group">
       <input
         type={showPassword ? "text" : "password"}
         name={name}
-        className="text-base w-full rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)]"
+        className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-gray-light)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:bg-white transition-all duration-300 ease-in-out shadow-sm"
         value={value}
         onChange={onChange}
         placeholder={placeholder}
       />
       <button 
         type="button" 
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-[var(--color-primary)] transition-colors duration-300"
         onClick={toggleShowPassword}
         aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
       >
         {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
       </button>
     </div>
-    {error && <span className="text-red-500 text-sm mt-1 block">{error}</span>}
+    {error && <span className="text-red-500 text-sm mt-2 block">{error}</span>}
   </div>
 );
 
@@ -154,15 +154,22 @@ const FormularioCambiarContraseñaActual = () => {
     if (!accountId) return null;
 
     return (
-        <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-r from-[var(--color-primary)] from-10% via-[var(--color-secondary)] via-50% to-[var(--color-accent)] to-100%">
-            <div className="flex shadow-2xl w-full max-w-2xl">
-                <div className="flex flex-col items-center justify-center text-center p-10 sm:p-16 gap-6 sm:gap-8 bg-white rounded-2xl xl:rounded-tr-2xl xl:rounded-br-2xl w-full">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-secondary)]">
-                        Cambiar contraseña
-                        <hr className="border-t border-gray-600 my-4" />
-                    </h1>
+        <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-blue-50 via-blue-50/80 to-blue-50">
+            <div className="w-full max-w-2xl">
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 sm:p-12 transform transition-all duration-300 hover:shadow-2xl border border-pink-100">
+                    <div className="text-center mb-10">
+                        <div className="w-16 h-16 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-pink-100">
+                            <svg className="w-8 h-8 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                            </svg>
+                        </div>
+                        <h1 className="text-3xl font-bold text-[var(--color-secondary)] mb-2">
+                            Cambiar Contraseña
+                        </h1>
+                        <p className="text-gray-600">Actualiza tus credenciales de forma segura</p>
+                    </div>
 
-                    <form onSubmit={handleSubmit} className="flex flex-col text-lg gap-3 w-full max-w-md">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <PasswordInput
                             label="Contraseña actual"
                             name="contraseñaActual"
@@ -203,11 +210,11 @@ const FormularioCambiarContraseñaActual = () => {
                             }
                         />
 
-                        <div className="flex flex-col sm:flex-row justify-end gap-4 w-full max-w-md mt-4">
+                        <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
                             <button 
                                 type="button" 
                                 onClick={() => navigate('/perfil')}
-                                className="w-full sm:w-auto px-6 py-2 text-lg sm:text-xl rounded-md bg-gray-400 hover:bg-gray-500 text-white transition-colors"
+                                className="px-6 py-3 text-white bg-gray-400 hover:bg-gray-500 rounded-lg transition-all duration-300 font-medium shadow-sm hover:shadow-md"
                             >
                                 Cancelar
                             </button>
@@ -215,7 +222,7 @@ const FormularioCambiarContraseñaActual = () => {
                             <button
                                 type="submit"
                                 disabled={!isFormValid() || cargando}
-                                className={`w-full sm:w-auto px-6 py-2 text-lg sm:text-xl rounded-md text-white transition-colors ${
+                                className={`px-6 py-3 text-white rounded-lg transition-all duration-300 font-medium shadow-sm hover:shadow-md ${
                                   isFormValid() 
                                     ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' 
                                     : 'bg-gray-400 cursor-not-allowed'
