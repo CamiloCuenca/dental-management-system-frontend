@@ -56,7 +56,7 @@ const ListaHistorialMedico = () => {
             <div key={anio} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
               <button
                 onClick={() => toggleAnio(anio)}
-                className="w-full text-left px-6 py-4 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white text-xl font-semibold hover:from-[var(--color-secondary)] hover:to-[var(--color-primary)] transition-all duration-300 flex items-center justify-between">
+                className="w-full text-left px-6 py-4 bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-secondary)] text-white text-xl font-semibold hover:from-[var(--color-secondary)] hover:to-[var(--color-primary)] transition-all duration-300 flex items-center justify-between">
                 <span>Historial año {anio}</span>
                 <span className="text-2xl">{aniosVisibles[anio] ? '▼' : '▶'}</span>
               </button>
