@@ -44,8 +44,132 @@ const ListaHistorialMedico = () => {
     }));
   };
 
-  const handleDescargar = () => {
-    toast("Función de descarga no implementada", { icon: 'ℹ️' });
+  const handleDescargar = async () => {
+    const toastId = toast.loading("Preparando descarga...", {
+      position: "bottom-right"
+    });
+  
+    try {
+      const id = TokenService.getUserId();
+      if (!id) {
+        toast.error("No se pudo obtener el ID del paciente. Por favor, inicie sesión nuevamente.");
+        return;
+      }
+  
+      const response = await api.post(
+        `/historiales/paciente/pdf/${id}`,
+        {},
+        {
+          responseType: 'blob',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        }
+      );
+  
+      if (!(response.data instanceof Blob) || response.data.size === 0) {
+        throw new Error("El archivo recibido no es válido");
+      }
+  
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      
+      link.href = downloadUrl;
+      link.setAttribute('download', `historial_dental_${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+  
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+        toast.success("✅ Descarga completada", { 
+          id: toastId,
+          position: "bottom-right"
+        });
+      }, 100);
+  
+    } catch (error) {
+      console.error('Error en la descarga:', error);
+      
+      let errorMessage = "Error al descargar el historial";
+      if (error.response) {
+        if (error.response.status === 500) {
+          errorMessage = "Error en el servidor al generar el PDF";
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+  
+      toast.error(`❌ ${errorMessage}`, { 
+        id: toastId,
+        position: "bottom-right"
+      });
+    }
+  };
+
+  const handleDescargarPorAnio = async (anio) => {
+    const toastId = toast.loading(`Preparando descarga del año ${anio}...`, {
+      position: "bottom-right"
+    });
+
+    try {
+      const id = TokenService.getUserId();
+      if (!id) {
+        toast.error("No se pudo obtener el ID del paciente. Por favor, inicie sesión nuevamente.");
+        return;
+      }
+
+      const response = await api.post(
+        `/historiales/paciente/pdf/${id}/${anio}`,
+        {},
+        {
+          responseType: 'blob',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        }
+      );
+
+      if (!(response.data instanceof Blob) || response.data.size === 0) {
+        throw new Error("El archivo recibido no es válido");
+      }
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      
+      link.href = downloadUrl;
+      link.setAttribute('download', `historial_dental_${id}_${anio}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+        toast.success(`✅ Descarga del año ${anio} completada`, { 
+          id: toastId,
+          position: "bottom-right"
+        });
+      }, 100);
+
+    } catch (error) {
+      console.error('Error en la descarga:', error);
+      
+      let errorMessage = `Error al descargar el historial del año ${anio}`;
+      if (error.response) {
+        if (error.response.status === 500) {
+          errorMessage = "Error en el servidor al generar el PDF";
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(`❌ ${errorMessage}`, { 
+        id: toastId,
+        position: "bottom-right"
+      });
+    }
   };
 
   return (
@@ -80,7 +204,7 @@ const ListaHistorialMedico = () => {
                   <span className="text-2xl">{aniosVisibles[anio] ? '▼' : '▶'}</span>
                 </button>
                 <button
-                  onClick={handleDescargar}
+                  onClick={() => handleDescargarPorAnio(anio)}
                   className="ml-4 bg-white text-[var(--color-primary)] hover:bg-gray-100 font-medium py-1 px-3 rounded-lg text-sm shadow transition-colors duration-300 flex items-center"
                 >
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
