@@ -38,11 +38,17 @@ export default function Header() {
     };
 
     const handleNavigation = (path) => {
-        if (path === "/citas" && userRole === "DOCTOR") {
-            navigate("/homeDoctor");
-        } else {
-            navigate(path);
+        if (path === "/citas") {
+            if (!isLoggedIn) {
+                navigate("/agendar-cita");
+                return;
+            }
+            if (userRole === "DOCTOR") {
+                navigate("/homeDoctor");
+                return;
+            }
         }
+        navigate(path);
     };
 
     const getLinkClass = (path) => (

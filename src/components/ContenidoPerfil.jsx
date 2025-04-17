@@ -76,19 +76,19 @@ const ContenidoPerfil = () => {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-blue-50 via-blue-50/80 to-blue-50">
+    <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-white">
         <div className="w-full max-w-4xl">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 sm:p-12 transform transition-all duration-300 hover:shadow-2xl border border-pink-100">
+            <div className="bg-white/80 backdrop-blur-sm border-2 border-[var(--color-secondary)]/20 rounded-3xl shadow-xl shadow-[var(--color-secondary)]/10 p-8 sm:p-12 transform transition-all duration-300">
                 <div className="text-center mb-10">
-                    <div className="w-16 h-16 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-pink-100">
+                    <div className="w-16 h-16 bg-[var(--color-primary)]/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[var(--color-primary)]/20">
                         <svg className="w-8 h-8 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
-                    <h2 className="text-3xl font-bold text-[var(--color-secondary)] mb-2">
+                    <h2 className="text-3xl font-bold text-[var(--color-primary)] mb-2">
                         Perfil de Usuario
                     </h2>
-                    <p className="text-gray-600">Gestiona tu información personal</p>
+                    <p className="text-[var(--color-secondary)]/80">Gestiona tu información personal</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mb-10">

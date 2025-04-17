@@ -11,7 +11,7 @@ const Inicio = () => {
         title="Agenda tu Cita"
         description="Solicita tu cita con nosotros de manera rápida y sencilla."
         buttonText="Agendar Cita"
-        redirectTo="/citas"
+        redirectTo="/agendar-cita"
       />
       <Card
         image={Historial}

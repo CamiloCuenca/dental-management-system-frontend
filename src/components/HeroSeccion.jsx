@@ -29,7 +29,7 @@ const HeroSeccion = () => {
                 {/* Botón para agendar cita */}
                 <div className="mt-5 flex flex-col md:flex-row md:space-x-4 space-y-3 md:space-y-0 items-center md:items-start">
                     <a 
-                        href="/citas"
+                        href="/agendar-cita"
                         className="px-5 py-2.5 bg-white text-[var(--color-primary)] hover:bg-gray-200 text-lg font-semibold rounded shadow-md transition duration-300"
                     >
                         Agenda una Cita
