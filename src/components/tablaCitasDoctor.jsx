@@ -17,6 +17,20 @@ const CitasDoctor = () => {
     } else {
       toast.error("No se pudo obtener el ID del doctor. Por favor, inicie sesión nuevamente.");
     }
+
+    // Agregar un listener para el evento 'cita-creada'
+    const handleCitaCreada = () => {
+      const currentDoctorId = TokenService.getUserId();
+      if (currentDoctorId) {
+        obtenerCitas(currentDoctorId);
+      }
+    };
+
+    window.addEventListener("cita-creada", handleCitaCreada);
+
+    return () => {
+      window.removeEventListener("cita-creada", handleCitaCreada);
+    };
   }, []);
 
   const obtenerCitas = async (id) => {
@@ -25,7 +39,7 @@ const CitasDoctor = () => {
       const response = await api.get(`/citas/doctor/${id}`);
       const citasFormateadas = response.data.map((cita) => ({
         ...cita,
-        fecha: new Date(cita.fechaHora).toLocaleString("es-ES", {
+        fechaHora: new Date(cita.fechaHora).toLocaleString("es-ES", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
@@ -37,6 +51,7 @@ const CitasDoctor = () => {
     } catch (error) {
       console.error("Error al obtener citas:", error);
       toast.error("No se pudieron cargar las citas.");
+      setCitas([]);
     } finally {
       setLoading(false);
     }
@@ -63,6 +78,8 @@ const CitasDoctor = () => {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <p className="text-center text-secondary py-4">Cargando citas...</p>
+          ) : citas.length === 0 ? (
+            <p className="text-center text-secondary py-4">No hay citas asignadas</p>
           ) : (
             <CitasTable citas={citas} onIniciar={handleIniciarCita} />
           )}
