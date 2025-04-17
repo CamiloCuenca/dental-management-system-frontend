@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaBars, FaTimes, FaUserCircle, FaCaretDown } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import TokenService from '../services/tokenService';
 
 export default function Header() {
@@ -9,7 +9,9 @@ export default function Header() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userName, setUserName] = useState("");
     const [userLastName, setUserLastName] = useState("");
+    const [userRole, setUserRole] = useState("");
     const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         // Verificar si el usuario está autenticado
@@ -23,6 +25,9 @@ export default function Header() {
                 setUserName(nombre || "Usuario");
                 setUserLastName(apellido || "");
             }
+            // Obtener el rol del usuario
+            const role = TokenService.getRole();
+            setUserRole(role);
         }
     }, []);
 
@@ -30,6 +35,14 @@ export default function Header() {
         TokenService.clearToken();
         setIsLoggedIn(false);
         window.location.href = "/";
+    };
+
+    const handleNavigation = (path) => {
+        if (path === "/citas" && userRole === "DOCTOR") {
+            navigate("/homeDoctor");
+        } else {
+            navigate(path);
+        }
     };
 
     const getLinkClass = (path) => (
@@ -51,9 +64,12 @@ export default function Header() {
                 <ul className="hidden md:flex space-x-8 text-xl">
                     {["/", "/citas", "/historialMedicoUsuario"].map((path, index) => (
                         <li key={index} className="relative group">
-                            <a href={path} className={getLinkClass(path)}>
+                            <button
+                                onClick={() => handleNavigation(path)}
+                                className={getLinkClass(path)}
+                            >
                                 {path === "/" ? "Home" : path === "/citas" ? "Citas" : "Historiales Médicos"}
-                            </a>
+                            </button>
                             <span className="absolute left-0 bottom-0 w-0 h-[3px] bg-accent transition-all duration-300 group-hover:w-full"></span>
                         </li>
                     ))}
@@ -68,7 +84,7 @@ export default function Header() {
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                             >
                                 <FaUserCircle className="text-2xl" />
-                                <span>{userName} {userLastName}</span>
+                                <span>{userRole === 'DOCTOR' ? 'Doctor ' : ''}{userName} {userLastName}</span>
                                 <FaCaretDown className="text-xl" />
                             </button>
                             
@@ -77,7 +93,7 @@ export default function Header() {
                                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
                                     <div className="px-4 py-2 border-b border-gray-200">
                                         <p className="text-sm text-gray-500">Bienvenido</p>
-                                        <p className="font-semibold text-gray-800">{userName} {userLastName}</p>
+                                        <p className="font-semibold text-gray-800">{userRole === 'DOCTOR' ? 'Doctor ' : ''}{userName} {userLastName}</p>
                                     </div>
                                     <a
                                         href="/perfil"
@@ -115,13 +131,18 @@ export default function Header() {
             {isOpen && (
                 <div className="md:hidden bg-secondary text-white py-4 px-6 space-y-4">
                     {["Home", "Citas", "Historiales Médicos", "Iniciar sesión", "Registro"].map((text, index) => (
-                        <a
+                        <button
                             key={index}
-                            href={text === "Home" ? "/" : text === "Citas" ? "/citas" : text === "Historiales Médicos" ? "/historialMedicoUsuario" : text === "Iniciar sesión" ? "/login" : "/registro"}
+                            onClick={() => handleNavigation(
+                                text === "Home" ? "/" : 
+                                text === "Citas" ? "/citas" : 
+                                text === "Historiales Médicos" ? "/historialMedicoUsuario" : 
+                                text === "Iniciar sesión" ? "/login" : "/registro"
+                            )}
                             className="block text-xl font-semibold hover:text-accent transition-all duration-300"
                         >
                             {text}
-                        </a>
+                        </button>
                     ))}
                     {isLoggedIn && (
                         <>
