@@ -3,6 +3,7 @@ import Table from "./Table";
 import api from "../services/api";
 import { toast } from "react-hot-toast";
 import TokenService from "../services/tokenService";
+import EditarCitaModal from "./EditarCitaModal";
 
 const columns = [
   { key: "id", label: "ID Cita" },
@@ -19,6 +20,7 @@ export default function TableCitas() {
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
+  const [citaEditando, setCitaEditando] = useState(null);
 
   useEffect(() => {
     const pacienteId = TokenService.getUserId();
@@ -86,24 +88,17 @@ export default function TableCitas() {
   };
 
   const handleEdit = (cita) => {
-    setEditandoId(cita.id);
+    if (cita.estado === "CANCELADA" || cita.estado === "COMPLETADA") {
+      toast.error("No se puede editar una cita cancelada o completada");
+      return;
+    }
+    setCitaEditando(cita);
   };
 
-  const handleTipoCitaChange = async (idCita, nuevoTipoCita) => {
-    try {
-      await api.put(`/citas/editar/${idCita}`, null, {
-        params: { nuevoTipoCita },
-      });
-      setCitas((prevCitas) =>
-        prevCitas.map((c) =>
-          c.id === idCita ? { ...c, tipoCitaNombre: nuevoTipoCita } : c
-        )
-      );
-      setEditandoId(null);
-      toast.success("Cita actualizada correctamente.");
-    } catch (error) {
-      console.error("Error al actualizar la cita:", error);
-      toast.error("Ocurrió un error al actualizar la cita.");
+  const handleEditSuccess = () => {
+    const pacienteId = TokenService.getUserId();
+    if (pacienteId) {
+      buscarCitasConId(pacienteId);
     }
   };
 
@@ -148,11 +143,18 @@ export default function TableCitas() {
               onEdit={handleEdit}
               onDelete={handleDelete}
               editandoId={editandoId}
-              handleTipoCitaChange={handleTipoCitaChange}
             />
           )}
         </div>
       </div>
+
+      {citaEditando && (
+        <EditarCitaModal
+          cita={citaEditando}
+          onClose={() => setCitaEditando(null)}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </div>
   );
 }
