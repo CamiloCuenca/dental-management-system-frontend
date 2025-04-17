@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Table from "./Table";
 import api from "../services/api";
 import { toast } from "react-hot-toast";
+import TokenService from "../services/tokenService";
 
 const columns = [
   { key: "id", label: "ID Cita" },
@@ -17,21 +18,22 @@ const columns = [
 export default function TableCitas() {
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [idPaciente, setIdPaciente] = useState("");
   const [editandoId, setEditandoId] = useState(null);
 
   useEffect(() => {
-    const storedId = sessionStorage.getItem("idPaciente");
-    if (storedId) {
-      setIdPaciente(storedId);
-      buscarCitasConId(storedId);
+    const pacienteId = TokenService.getUserId();
+    if (pacienteId) {
+      buscarCitasConId(pacienteId);
+    } else {
+      toast.error("No se pudo obtener el ID del paciente. Por favor, inicie sesión nuevamente.");
     }
 
     // Agregar un listener para el evento 'cita-creada'
     const handleCitaCreada = () => {
       // Re-cargar las citas cada vez que se cree una nueva cita
-      if (idPaciente) {
-        buscarCitasConId(idPaciente);
+      const currentPacienteId = TokenService.getUserId();
+      if (currentPacienteId) {
+        buscarCitasConId(currentPacienteId);
       }
     };
 
@@ -42,7 +44,7 @@ export default function TableCitas() {
     return () => {
       window.removeEventListener("cita-creada", handleCitaCreada);
     };
-  }, [idPaciente]);
+  }, []);
 
   const buscarCitasConId = async (id) => {
     setLoading(true);
@@ -59,7 +61,6 @@ export default function TableCitas() {
         }),
       }));
       setCitas(citasFormateadas);
-      sessionStorage.setItem("idPaciente", id);
     } catch (error) {
       console.error("Error al obtener citas:", error);
       toast.error("No se pudieron cargar las citas.");
@@ -129,9 +130,6 @@ export default function TableCitas() {
         <h2 className="text-3xl font-extrabold text-primary text-center mb-6 tracking-wide">
           🦷 Consulta tus Citas 🦷
         </h2>
-
-        <div className="flex flex-col sm:flex-row gap-4 items-center mb-6">
-        </div>
 
         <div className="flex-1 overflow-y-auto rounded-xl border border-gray-200 shadow-inner">
           {loading ? (
