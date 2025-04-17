@@ -1,6 +1,6 @@
 // src/components/ListaHistorialMedico.jsx
 import { useState, useEffect } from 'react';
-import api from '../services/api'; // cliente Axios ya configurado
+import api from '../services/api';
 import TokenService from '../services/tokenService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -44,6 +44,10 @@ const ListaHistorialMedico = () => {
     }));
   };
 
+  const handleDescargar = () => {
+    toast("Función de descarga no implementada", { icon: 'ℹ️' });
+  };
+
   return (
     <div className="w-full">
       {loading ? (
@@ -52,14 +56,39 @@ const ListaHistorialMedico = () => {
         </div>
       ) : Object.keys(historialPorAnio).length > 0 ? (
         <div className="space-y-6">
+          {/* Botón para descargar todo */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={handleDescargar}
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-secondary)] text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 flex items-center"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Descargar todo el historial
+            </button>
+          </div>
+
           {Object.entries(historialPorAnio).map(([anio, historiales]) => (
             <div key={anio} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-              <button
-                onClick={() => toggleAnio(anio)}
-                className="w-full text-left px-6 py-4 bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-secondary)] text-white text-xl font-semibold hover:from-[var(--color-secondary)] hover:to-[var(--color-primary)] transition-all duration-300 flex items-center justify-between">
-                <span>Historial año {anio}</span>
-                <span className="text-2xl">{aniosVisibles[anio] ? '▼' : '▶'}</span>
-              </button>
+              <div className="flex justify-between items-center w-full px-6 py-4 bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-secondary)] text-white hover:from-[var(--color-secondary)] hover:to-[var(--color-primary)] transition-all duration-300">
+                <button
+                  onClick={() => toggleAnio(anio)}
+                  className="text-left text-xl font-semibold flex items-center justify-between w-full"
+                >
+                  <span>Historial año {anio}</span>
+                  <span className="text-2xl">{aniosVisibles[anio] ? '▼' : '▶'}</span>
+                </button>
+                <button
+                  onClick={handleDescargar}
+                  className="ml-4 bg-white text-[var(--color-primary)] hover:bg-gray-100 font-medium py-1 px-3 rounded-lg text-sm shadow transition-colors duration-300 flex items-center"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Descargar
+                </button>
+              </div>
 
               {aniosVisibles[anio] && (
                 <div className="p-6">
