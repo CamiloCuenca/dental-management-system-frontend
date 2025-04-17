@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import Table from "./Table";
 import api from "../services/api";
 import { toast } from "react-hot-toast";
-import TokenService from "../services/tokenService";
 import EditarCitaModal from "./EditarCitaModal";
 
 const columns = [
   { key: "id", label: "ID Cita" },
+  { key: "nombrePaciente", label: "Nombre Paciente" },
   { key: "pacienteId", label: "ID Paciente" },
   { key: "doctorId", label: "ID Doctor" },
   { key: "doctorNombre", label: "Doctor" },
@@ -16,42 +16,20 @@ const columns = [
   { key: "acciones", label: "Acciones" },
 ];
 
-export default function TableCitas() {
+export default function TableCitasNoAuth() {
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
   const [citaEditando, setCitaEditando] = useState(null);
 
   useEffect(() => {
-    const pacienteId = TokenService.getUserId();
-    if (pacienteId) {
-      buscarCitasConId(pacienteId);
-    } else {
-      toast.error("No se pudo obtener el ID del paciente. Por favor, inicie sesión nuevamente.");
-    }
-
-    // Agregar un listener para el evento 'cita-creada'
-    const handleCitaCreada = () => {
-      // Re-cargar las citas cada vez que se cree una nueva cita
-      const currentPacienteId = TokenService.getUserId();
-      if (currentPacienteId) {
-        buscarCitasConId(currentPacienteId);
-      }
-    };
-
-    // Escuchar el evento 'cita-creada'
-    window.addEventListener("cita-creada", handleCitaCreada);
-
-    // Limpiar el evento al desmontar el componente
-    return () => {
-      window.removeEventListener("cita-creada", handleCitaCreada);
-    };
+    buscarCitasNoAuth();
   }, []);
 
-  const buscarCitasConId = async (id) => {
+  const buscarCitasNoAuth = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/citas/paciente/${id}`);
+      const response = await api.get('/citas-no-autenticadas');
       const citasFormateadas = response.data.map((cita) => ({
         ...cita,
         fechaHora: new Date(cita.fechaHora).toLocaleString("es-ES", {
@@ -64,7 +42,7 @@ export default function TableCitas() {
       }));
       setCitas(citasFormateadas);
     } catch (error) {
-      console.error("Error al obtener citas:", error);
+      console.error("Error al obtener citas no autenticadas:", error);
       toast.error("No se pudieron cargar las citas.");
       setCitas([]);
     } finally {
@@ -96,16 +74,13 @@ export default function TableCitas() {
   };
 
   const handleEditSuccess = () => {
-    const pacienteId = TokenService.getUserId();
-    if (pacienteId) {
-      buscarCitasConId(pacienteId);
-    }
+    buscarCitasNoAuth();
   };
 
   const handleDelete = async (cita) => {
     if (window.confirm("¿Seguro que quieres cancelar esta cita?")) {
       try {
-        await api.put(`/citas/cancelar/${cita.id}`);
+        await api.put(`/citas-no-autenticadas/cancelar/${cita.id}`);
         setCitas((prevCitas) =>
           prevCitas.map((c) =>
             c.id === cita.id ? { ...c, estado: "CANCELADA" } : c
@@ -120,10 +95,10 @@ export default function TableCitas() {
   };
 
   return (
-    <div className="min-h-screen  bg-white p-8 flex flex-col items-center ">
-      <div className="bg-white border-2 border-[var(--color-secondary)]/20 rounded-3xl shadow-xl shadow-[var(--color-secondary)]/10 p-8 w-full max-w-7xl h-[85vh] flex flex-col transition-all duration-300 ease-in-out ">
+    <div className="min-h-screen bg-white p-8 flex flex-col items-center">
+      <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-7xl h-[85vh] flex flex-col transition-all duration-300 ease-in-out">
         <h2 className="text-3xl font-extrabold text-primary text-center mb-6 tracking-wide">
-          🦷 Consulta tus Citas 🦷
+          🦷 Citas No Autenticadas 🦷
         </h2>
 
         <div className="flex-1 overflow-y-auto rounded-xl border border-gray-200 shadow-inner">
@@ -157,4 +132,4 @@ export default function TableCitas() {
       )}
     </div>
   );
-}
+} 

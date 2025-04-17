@@ -13,6 +13,8 @@ import PerfilDoctor from './pages/perfilDoctor';
 import HistorialMedico from './pages/historialMedicoUsuario';
 import ActualizarUsuario from './pages/actualizarUsuario';
 import HomeDoctor from './pages/HomeDoctor';
+import AgendarCitaPublico from './pages/agendarCitaPublico';
+import CitasNoAuth from './pages/citasNoAuth';
 import { Toaster } from 'react-hot-toast';
 import CitasDoctor from './components/tablaCitasDoctor';
 import FormularioHistorial from './components/FormularioHistorial';
@@ -54,9 +56,6 @@ function App() {
         {/* Ruta para cambiar la contraseña actual */}
         <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
 
-        {/* Ruta para cambiar la contraseña actual */}
-        <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
-
         {/* Ruta para el perfil del usuario */}
         <Route path="/perfil" element={<Perfil />} />
 
@@ -72,6 +71,8 @@ function App() {
         <Route path="/homeDoctor" element={<HomeDoctor/>} />
         <Route path="/citasDoctor" element={<CitasDoctor/>} />
         <Route path="/formularioHistorial" element={<FormularioHistorial/>} />
+        <Route path="/agendar-cita" element={<AgendarCitaPublico/>} />
+        <Route path="/citas-no-auth" element={<CitasNoAuth/>} />
 
         {/* Ruta no encontrada (404) */}  
 
