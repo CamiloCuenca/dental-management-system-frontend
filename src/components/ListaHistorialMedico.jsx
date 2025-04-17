@@ -44,10 +44,74 @@ const ListaHistorialMedico = () => {
     }));
   };
 
-  const handleDescargar = () => {
-    toast("Función de descarga no implementada", { icon: 'ℹ️' });
+  const handleDescargar = async () => {
+    const toastId = toast.loading("Preparando descarga...", {
+      position: "bottom-right"
+    });
+  
+    try {
+      const id = TokenService.getUserId();
+      if (!id) {
+        toast.error("No se pudo obtener el ID del paciente. Por favor, inicie sesión nuevamente.");
+        return;
+      }
+  
+      const response = await api.post(
+        `/historiales/paciente/pdf/${id}`,
+        {},
+        {
+          responseType: 'blob',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        }
+      );
+  
+      // Verificar si la respuesta es un PDF válido
+      if (!(response.data instanceof Blob) || response.data.size === 0) {
+        throw new Error("El archivo recibido no es válido");
+      }
+  
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      
+      link.href = downloadUrl;
+      link.setAttribute('download', `historial_dental_${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+  
+      // Limpieza
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+        toast.success("✅ Descarga completada", { 
+          id: toastId,
+          position: "bottom-right"
+        });
+      }, 100);
+  
+    } catch (error) {
+      console.error('Error en la descarga:', error);
+      
+      let errorMessage = "Error al descargar el historial";
+      if (error.response) {
+        // Si hay respuesta del servidor con error
+        if (error.response.status === 500) {
+          errorMessage = "Error en el servidor al generar el PDF";
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+  
+      toast.error(`❌ ${errorMessage}`, { 
+        id: toastId,
+        position: "bottom-right"
+      });
+    }
   };
 
+  
   return (
     <div className="w-full">
       {loading ? (
