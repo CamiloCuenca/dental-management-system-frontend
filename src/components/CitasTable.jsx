@@ -1,6 +1,7 @@
 import React from "react";
+import { Tooltip } from "react-tooltip";
 
-const CitasTable = ({ citas, onIniciar }) => {
+const CitasTable = ({ citas, onIniciar, puedeIniciar }) => {
   const getEstadoClass = (estado) => {
     switch (estado) {
       case "CANCELADA":
@@ -32,10 +33,10 @@ const CitasTable = ({ citas, onIniciar }) => {
         <tbody>
           {citas.length > 0 ? (
             citas.map((cita, index) => (
-                <tr key={cita.id} className={`border-b border-grayLight ${index % 2 === 0 ? "bg-grayLight" : "bg-white"}`}>
+              <tr key={cita.id} className={`border-b border-grayLight ${index % 2 === 0 ? "bg-grayLight" : "bg-white"}`}>
                 <td className="px-6 py-4">{cita.id}</td>
                 <td className="px-6 py-4">{cita.pacienteId}</td>
-                <td className="px-6 py-4">{cita.fecha}</td>
+                <td className="px-6 py-4">{cita.fechaHora}</td>
                 <td className="px-6 py-4">
                   <span className={getEstadoClass(cita.estado)}>{cita.estado}</span>
                 </td>
@@ -43,10 +44,24 @@ const CitasTable = ({ citas, onIniciar }) => {
                 <td className="px-6 py-4">
                   <button
                     onClick={() => onIniciar(cita)}
-                    className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition"
+                    disabled={!puedeIniciar(cita)}
+                    className={`px-4 py-2 rounded-md shadow transition ${
+                      puedeIniciar(cita) 
+                        ? "bg-green-500 hover:bg-green-600 text-white" 
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    data-tooltip-id={`tooltip-${cita.id}`}
+                    data-tooltip-content={
+                      !puedeIniciar(cita) 
+                        ? cita.estado !== "CONFIRMADA" 
+                          ? "Solo se pueden iniciar citas confirmadas" 
+                          : "Solo se pueden iniciar citas programadas para hoy"
+                        : "Iniciar cita"
+                    }
                   >
                     Iniciar Cita
                   </button>
+                  <Tooltip id={`tooltip-${cita.id}`} />
                 </td>
               </tr>
             ))
