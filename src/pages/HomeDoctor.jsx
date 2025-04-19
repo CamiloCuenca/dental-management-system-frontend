@@ -1,7 +1,7 @@
 import Header from "../components/Header";
 import TablaCitasDoctor from "../components/tablaCitasDoctor";
 import Footer from "../components/footer";
-import { FaCalendarAlt, FaUserInjured, FaChartLine, FaBell } from "react-icons/fa";
+import { FaCalendarAlt, FaUserInjured, FaChartLine, FaBell, FaCheckCircle, FaTimesCircle, FaCheck } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import api from "../services/api";
 import TokenService from "../services/tokenService";
@@ -10,7 +10,10 @@ const HomeDoctor = () => {
     const [estadisticas, setEstadisticas] = useState({
         citasHoy: 0,
         pacientesAtendidos: 0,
-        citasPendientes: 0
+        citasPendientes: 0,
+        citasCanceladas: 0,
+        citasCompletadas: 0,
+        citasConfirmadas: 0
     });
 
     const [proximasCitas, setProximasCitas] = useState([]);
@@ -38,10 +41,25 @@ const HomeDoctor = () => {
                     cita.estado === "PENDIENTE" || cita.estado === "CONFIRMADA"
                 ).length;
 
+                const citasCanceladas = citas.filter(cita => 
+                    cita.estado === "CANCELADA"
+                ).length;
+
+                const citasCompletadas = citas.filter(cita => 
+                    cita.estado === "COMPLETADA"
+                ).length;
+
+                const citasConfirmadas = citas.filter(cita => 
+                    cita.estado === "CONFIRMADA"
+                ).length;
+
                 setEstadisticas({
                     citasHoy,
                     pacientesAtendidos,
-                    citasPendientes
+                    citasPendientes,
+                    citasCanceladas,
+                    citasCompletadas,
+                    citasConfirmadas
                 });
 
                 // Obtener próximas citas (las 3 más próximas)
@@ -105,6 +123,39 @@ const HomeDoctor = () => {
                         <div>
                             <h3 className="text-gray-500 text-sm">Citas Pendientes</h3>
                             <p className="text-2xl font-bold text-yellow-500">{estadisticas.citasPendientes}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tarjetas de Estado de Citas */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center">
+                        <div className="bg-red-500/10 p-4 rounded-full mr-4">
+                            <FaTimesCircle className="text-red-500 text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 text-sm">Citas Canceladas</h3>
+                            <p className="text-2xl font-bold text-red-500">{estadisticas.citasCanceladas}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center">
+                        <div className="bg-blue-500/10 p-4 rounded-full mr-4">
+                            <FaCheckCircle className="text-blue-500 text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 text-sm">Citas Completadas</h3>
+                            <p className="text-2xl font-bold text-blue-500">{estadisticas.citasCompletadas}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center">
+                        <div className="bg-green-500/10 p-4 rounded-full mr-4">
+                            <FaCheck className="text-green-500 text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 text-sm">Citas Confirmadas</h3>
+                            <p className="text-2xl font-bold text-green-500">{estadisticas.citasConfirmadas}</p>
                         </div>
                     </div>
                 </div>

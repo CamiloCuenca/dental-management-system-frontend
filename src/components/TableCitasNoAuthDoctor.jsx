@@ -2,13 +2,20 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import TokenService from '../services/tokenService';
 import { toast } from 'react-hot-toast';
-import { FaPhone, FaEnvelope, FaUser, FaCalendarAlt, FaClock, FaStethoscope, FaExclamationTriangle, FaInfoCircle, FaIdCard } from 'react-icons/fa';
+import { FaPhone, FaEnvelope, FaUser, FaCalendarAlt, FaClock, FaStethoscope, FaExclamationTriangle, FaInfoCircle, FaIdCard, FaCheckCircle, FaTimesCircle, FaCheck, FaBell } from 'react-icons/fa';
 
 const TableCitasNoAuthDoctor = () => {
     const [citas, setCitas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [hoy, setHoy] = useState("");
+    const [estadisticas, setEstadisticas] = useState({
+        total: 0,
+        canceladas: 0,
+        completadas: 0,
+        confirmadas: 0,
+        pendientes: 0
+    });
 
     useEffect(() => {
         // Obtener fecha actual en formato YYYY-MM-DD para comparación (sin hora)
@@ -70,12 +77,20 @@ const TableCitasNoAuthDoctor = () => {
                             fecha: fechaCita.toLocaleDateString("es-ES")
                         };
                     })
-                    .filter(esCitaValida); // Filtrar citas inválidas
+                    .filter(esCitaValida);
 
-                console.log('Citas recibidas:', response.data);
-                console.log('Citas válidas:', citasFormateadas);
+                // Calcular estadísticas
+                const estadisticasCalculadas = {
+                    total: citasFormateadas.length,
+                    canceladas: citasFormateadas.filter(cita => cita.estado === "CANCELADA").length,
+                    completadas: citasFormateadas.filter(cita => cita.estado === "COMPLETADA").length,
+                    confirmadas: citasFormateadas.filter(cita => cita.estado === "CONFIRMADA").length,
+                    pendientes: citasFormateadas.filter(cita => cita.estado === "PENDIENTE").length
+                };
 
+                setEstadisticas(estadisticasCalculadas);
                 setCitas(citasFormateadas);
+
                 if (citasFormateadas.length === 0) {
                     toast.info('No hay citas no autenticadas disponibles');
                 }
@@ -124,6 +139,59 @@ const TableCitasNoAuthDoctor = () => {
             <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-7xl h-[85vh] flex flex-col">
                 <h2 className="text-2xl font-bold text-secondary mb-4 text-center">🩺 Citas No Autenticadas</h2>
                 
+                {/* Tarjetas de Estadísticas */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center">
+                        <div className="bg-primary/10 p-4 rounded-full mr-4">
+                            <FaCalendarAlt className="text-secondary text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 text-sm">Total Citas</h3>
+                            <p className="text-2xl font-bold text-secondary">{estadisticas.total}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center">
+                        <div className="bg-red-500/10 p-4 rounded-full mr-4">
+                            <FaTimesCircle className="text-red-500 text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 text-sm">Canceladas</h3>
+                            <p className="text-2xl font-bold text-red-500">{estadisticas.canceladas}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center">
+                        <div className="bg-blue-500/10 p-4 rounded-full mr-4">
+                            <FaCheckCircle className="text-blue-500 text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 text-sm">Completadas</h3>
+                            <p className="text-2xl font-bold text-blue-500">{estadisticas.completadas}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center">
+                        <div className="bg-green-500/10 p-4 rounded-full mr-4">
+                            <FaCheck className="text-green-500 text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 text-sm">Confirmadas</h3>
+                            <p className="text-2xl font-bold text-green-500">{estadisticas.confirmadas}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center">
+                        <div className="bg-yellow-500/10 p-4 rounded-full mr-4">
+                            <FaBell className="text-yellow-500 text-2xl" />
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500 text-sm">Pendientes</h3>
+                            <p className="text-2xl font-bold text-yellow-500">{estadisticas.pendientes}</p>
+                        </div>
+                    </div>
+                </div>
+
                 {error && (
                     <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
                         <div className="flex items-center">
@@ -165,7 +233,7 @@ const TableCitasNoAuthDoctor = () => {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <FaIdCard className="text-primary" />
-                                                <span>{cita.pacienteId || "No especificado"}</span>
+                                                <span>{cita.numeroIdentificacionNoAutenticado || "No especificado"}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <FaEnvelope className="text-primary" />
