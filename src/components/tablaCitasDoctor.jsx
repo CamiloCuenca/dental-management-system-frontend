@@ -9,8 +9,14 @@ const CitasDoctor = () => {
   const navigate = useNavigate();
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hoy, setHoy] = useState("");
 
   useEffect(() => {
+    // Obtener fecha actual en formato YYYY-MM-DD para comparación
+    const fechaActual = new Date();
+    const fechaHoy = fechaActual.toISOString().split('T')[0];
+    setHoy(fechaHoy);
+
     const doctorId = TokenService.getUserId();
     if (doctorId) {
       obtenerCitas(doctorId);
@@ -18,7 +24,6 @@ const CitasDoctor = () => {
       toast.error("No se pudo obtener el ID del doctor. Por favor, inicie sesión nuevamente.");
     }
 
-    // Agregar un listener para el evento 'cita-creada'
     const handleCitaCreada = () => {
       const currentDoctorId = TokenService.getUserId();
       if (currentDoctorId) {
@@ -46,6 +51,8 @@ const CitasDoctor = () => {
           hour: "2-digit",
           minute: "2-digit",
         }),
+        fechaParaComparacion: new Date(cita.fechaHora).toISOString().split('T')[0], // Para comparación
+        fecha: new Date(cita.fechaHora).toLocaleDateString("es-ES") // Formato visual
       }));
       setCitas(citasFormateadas);
     } catch (error) {
@@ -58,9 +65,18 @@ const CitasDoctor = () => {
   };
 
   const handleIniciarCita = (cita) => {
+    if (cita.fechaParaComparacion !== hoy) {
+      toast.error("Solo se pueden iniciar citas programadas para hoy");
+      return;
+    }
+    
+    if (cita.estado !== "CONFIRMADA") {
+      toast.error("Solo se pueden iniciar citas confirmadas");
+      return;
+    }
+    
     toast.success(`Iniciando cita ${cita.id}...`);
-    console.log("Iniciar cita con ID:", cita.id);
-  
+    
     navigate("/formularioHistorial", {
       state: {
         pacienteId: cita.pacienteId,
@@ -68,6 +84,10 @@ const CitasDoctor = () => {
         odontologoId: TokenService.getUserId()
       }
     });
+  };
+
+  const puedeIniciarCita = (cita) => {
+    return cita.fechaParaComparacion === hoy && cita.estado === "CONFIRMADA";
   };
 
   return (
@@ -81,7 +101,11 @@ const CitasDoctor = () => {
           ) : citas.length === 0 ? (
             <p className="text-center text-secondary py-4">No hay citas asignadas</p>
           ) : (
-            <CitasTable citas={citas} onIniciar={handleIniciarCita} />
+            <CitasTable 
+              citas={citas} 
+              onIniciar={handleIniciarCita} 
+              puedeIniciar={puedeIniciarCita}
+            />
           )}
         </div>
       </div>
