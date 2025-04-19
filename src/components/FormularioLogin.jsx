@@ -72,8 +72,8 @@ const FormularioLogin = () => {
                     navigate("/");
                 } else if (rol === "DOCTOR") {
                     navigate("/homeDoctor");
-                } else {
-                    navigate("/");
+                } else if (rol == "ADMINISTRATOR") {
+                    navigate("/homeAdmin");
                 }
             });
 
