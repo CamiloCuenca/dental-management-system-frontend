@@ -5,7 +5,7 @@ import Footer from "../components/footer";
 
 export default function Citas() {
     return (
-        <div className="bg-white min-h-screen flex flex-col transition-all duration-300 ease-in-out">
+        <div className="min-h-screen flex flex-col transition-all duration-300 ease-in-out bg-gradient-to-br from-blue-50 via-blue-50/80 to-blue-50">
         <Header />
     
         <main className="container mx-auto px-6 py-10 space-y-16 flex-grow">

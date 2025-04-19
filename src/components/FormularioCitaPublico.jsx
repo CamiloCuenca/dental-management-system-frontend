@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import TokenService from '../services/tokenService';
 import Swal from 'sweetalert2';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../styles/FormularioCita.css';
 
-const FormularioCita = () => {
+const FormularioCitaPublico = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
+        nombrePaciente: "",
         pacienteId: "",
-        odontologoId: "",
+        email: "",
+        telefono: "",
+        doctorId: "",
         fecha: "",
         hora: "",
         tipoCitaId: ""
@@ -23,35 +25,6 @@ const FormularioCita = () => {
     const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
 
     useEffect(() => {
-        if (!TokenService.isAuthenticated()) {
-            navigate('/login');
-            return;
-        }
-
-        const id = TokenService.getAccountId();
-        if (!id) {
-            navigate('/login');
-            return;
-        }
-
-        const obtenerDatosUsuario = async () => {
-            try {
-                const response = await api.get(`/cuenta/perfil/${id}`);
-                setFormData(prev => ({
-                    ...prev,
-                    pacienteId: response.data.idNumber
-                }));
-            } catch (error) {
-                console.error('Error al obtener datos del usuario:', error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudieron cargar los datos del usuario',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar'
-                });
-            }
-        };
-
         const obtenerTiposCita = async () => {
             try {
                 const response = await api.get('/citas/tipos');
@@ -67,9 +40,8 @@ const FormularioCita = () => {
             }
         };
 
-        obtenerDatosUsuario();
         obtenerTiposCita();
-    }, [navigate]);
+    }, []);
 
     const obtenerDoctoresPorEspecialidad = async (tipoCitaId) => {
         try {
@@ -92,20 +64,12 @@ const FormularioCita = () => {
 
     const obtenerFechasDisponibles = async (doctorId) => {
         try {
-            console.log('=== Obteniendo fechas disponibles ===');
-            console.log('Doctor ID:', doctorId);
-
-            // Obtener la fecha actual y la fecha de fin (30 días después)
             const fechaInicio = new Date();
             const fechaFin = new Date();
             fechaFin.setDate(fechaFin.getDate() + 30);
 
-            // Formatear fechas para la API
             const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
             const fechaFinStr = fechaFin.toISOString().split('T')[0];
-
-            console.log('Fecha inicio:', fechaInicioStr);
-            console.log('Fecha fin:', fechaFinStr);
 
             const response = await api.get(`/citas/disponibilidad/fechas/${doctorId}`, {
                 params: {
@@ -114,36 +78,23 @@ const FormularioCita = () => {
                 }
             });
 
-            console.log('Respuesta del servidor:', response.data);
-
             if (response.data && Array.isArray(response.data)) {
-                // Procesar las fechas disponibles según el DTO
-                const fechasProcesadas = response.data.map(fechaDTO => {
-                    // Convertir la fecha de LocalDate a Date
-                    const fecha = new Date(fechaDTO.fecha);
-
-                    // Procesar los horarios disponibles
-                    const horarios = fechaDTO.horarios.map(horarioDTO => ({
+                const fechasProcesadas = response.data.map(fechaDTO => ({
+                    fecha: new Date(fechaDTO.fecha),
+                    horarios: fechaDTO.horarios.map(horarioDTO => ({
                         hora: horarioDTO.hora,
                         disponible: horarioDTO.disponible
-                    }));
+                    })),
+                    fechaFormateada: new Date(fechaDTO.fecha).toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    })
+                }));
 
-                    return {
-                        fecha: fecha,
-                        horarios: horarios,
-                        fechaFormateada: fecha.toLocaleDateString('es-ES', {
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                        })
-                    };
-                });
-
-                console.log('Fechas procesadas:', fechasProcesadas);
                 setFechasDisponibles(fechasProcesadas);
             } else {
-                console.error('Formato de respuesta inesperado:', response.data);
                 setFechasDisponibles([]);
             }
         } catch (error) {
@@ -165,9 +116,8 @@ const FormularioCita = () => {
                 [name]: value
             };
 
-            // Si se cambia el tipo de cita, resetear doctor, fecha y hora
             if (name === 'tipoCitaId') {
-                newData.odontologoId = "";
+                newData.doctorId = "";
                 newData.fecha = "";
                 newData.hora = "";
                 setFechaSeleccionada(null);
@@ -177,8 +127,7 @@ const FormularioCita = () => {
                 }
             }
 
-            // Si se cambia el doctor, resetear fecha y hora
-            if (name === 'odontologoId') {
+            if (name === 'doctorId') {
                 newData.fecha = "";
                 newData.hora = "";
                 setFechaSeleccionada(null);
@@ -188,7 +137,6 @@ const FormularioCita = () => {
                 }
             }
 
-            // Si se cambia la fecha, resetear la hora
             if (name === 'fecha') {
                 newData.hora = "";
             }
@@ -200,7 +148,6 @@ const FormularioCita = () => {
     const handleFechaSeleccionada = (fecha) => {
         if (!fecha) return;
 
-        // Verificar si la fecha está disponible
         const fechaStr = fecha.toISOString().split('T')[0];
         const fechaDisponible = fechasDisponibles.find(f =>
             f.fecha.toISOString().split('T')[0] === fechaStr
@@ -211,10 +158,9 @@ const FormularioCita = () => {
             setFormData(prev => ({
                 ...prev,
                 fecha: fechaStr,
-                hora: "" // Resetear la hora cuando se cambia la fecha
+                hora: ""
             }));
         } else {
-            // Si la fecha no está disponible, mostrar un mensaje
             Swal.fire({
                 icon: 'warning',
                 title: 'Fecha no disponible',
@@ -238,8 +184,9 @@ const FormularioCita = () => {
         setCargando(true);
 
         try {
-            // Validar que todos los campos requeridos estén llenos
-            if (!formData.pacienteId || !formData.odontologoId || !formData.fecha || !formData.hora || !formData.tipoCitaId) {
+            if (!formData.nombrePaciente || !formData.pacienteId || !formData.email || 
+                !formData.telefono || !formData.doctorId || !formData.fecha || 
+                !formData.hora || !formData.tipoCitaId) {
                 await Swal.fire({
                     icon: 'warning',
                     title: 'Campos incompletos',
@@ -248,7 +195,6 @@ const FormularioCita = () => {
                 return;
             }
 
-            // Validar que la fecha no sea en el pasado
             const fechaSeleccionada = new Date(`${formData.fecha}T${formData.hora}:00`);
             if (fechaSeleccionada < new Date()) {
                 await Swal.fire({
@@ -259,7 +205,6 @@ const FormularioCita = () => {
                 return;
             }
 
-            // Validar que la hora esté dentro del horario de trabajo (8:00 - 17:00)
             const horaSeleccionada = parseInt(formData.hora.split(':')[0]);
             if (horaSeleccionada < 8 || horaSeleccionada >= 17) {
                 await Swal.fire({
@@ -270,54 +215,88 @@ const FormularioCita = () => {
                 return;
             }
 
-            // Crear el DTO de la cita según la nueva estructura del backend
             const citaDTO = {
+                nombrePaciente: formData.nombrePaciente,
                 pacienteId: formData.pacienteId,
-                doctorId: formData.odontologoId,
-                fecha: formData.fecha, // Formato: YYYY-MM-DD
-                hora: formData.hora,   // Formato: HH:mm
+                email: formData.email,
+                telefono: formData.telefono,
+                doctorId: formData.doctorId,
+                fecha: formData.fecha,
+                hora: formData.hora,
                 tipoCitaId: parseInt(formData.tipoCitaId)
             };
 
-            console.log('Enviando citaDTO:', citaDTO);
+            console.log('Enviando datos al servidor:', JSON.stringify(citaDTO, null, 2));
 
-            // Realizar la petición al backend
-            const response = await api.post('/citas/crear', citaDTO, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.status === 200) {
-                // Guardar el ID de la cita en el token
-                if (response.data && response.data.id) {
-                    TokenService.setAppointmentId(response.data.id);
-                }
-
-                window.dispatchEvent(new Event("cita-creada"));
-
-                await Swal.fire({
-                    icon: 'success',
-                    title: '¡Éxito!',
-                    text: 'Cita creada correctamente',
-                    timer: 2000,
-                    showConfirmButton: false
+            try {
+                const response = await api.post('/citas-no-autenticadas', citaDTO, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
                 });
 
-                navigate('/citas');
+                if (response.status === 200) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: 'Cita creada correctamente. Te enviaremos un correo de confirmación.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    navigate('/');
+                }
+            } catch (error) {
+                console.error('Error al crear cita:', error);
+                console.error('Detalles del error:', {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    message: error.message,
+                    requestData: citaDTO
+                });
+
+                let mensajeError = 'Error al crear la cita';
+                let detallesError = '';
+
+                if (error.response?.status === 400) {
+                    mensajeError = 'No se pudo crear la cita';
+                    detallesError = 'Por favor, verifica que todos los datos sean correctos y que el horario esté disponible.';
+                } else if (error.response?.status === 500) {
+                    mensajeError = 'Error en el servidor';
+                    detallesError = 'Ha ocurrido un error inesperado. Por favor, intenta nuevamente más tarde.';
+                    if (error.response?.data?.message) {
+                        detallesError = error.response.data.message;
+                    }
+                }
+
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    html: `
+                        <div class="text-left">
+                            <p class="mb-2">${mensajeError}</p>
+                            ${detallesError ? `<p class="text-sm text-gray-600">${detallesError}</p>` : ''}
+                        </div>
+                    `,
+                    confirmButtonText: 'Aceptar'
+                });
+            } finally {
+                setCargando(false);
             }
         } catch (error) {
             console.error('Error al crear cita:', error);
-            console.error('Detalles del error:', error.response?.data);
-            console.error('Estado del error:', error.response?.status);
-            console.error('Headers del error:', error.response?.headers);
+            console.error('Detalles del error:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
 
             let mensajeError = 'Error al crear la cita';
+            let detallesError = '';
 
-            // Manejar errores específicos del backend
             if (error.response?.data) {
                 const errorData = error.response.data;
-
                 if (typeof errorData === 'string') {
                     mensajeError = errorData;
                 } else if (errorData.message) {
@@ -325,40 +304,106 @@ const FormularioCita = () => {
                 } else if (errorData.error) {
                     mensajeError = errorData.error;
                 }
+
+                if (errorData.details) {
+                    detallesError = errorData.details;
+                }
             }
 
-            Swal.fire({
+            await Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: mensajeError,
+                html: `
+                    <div class="text-left">
+                        <p class="mb-2">${mensajeError}</p>
+                        ${detallesError ? `<p class="text-sm text-gray-600">${detallesError}</p>` : ''}
+                    </div>
+                `,
                 confirmButtonText: 'Aceptar'
             });
-        } finally {
-            setCargando(false);
         }
     };
 
     return (
-        <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-blanco-100">
-            <div className="bg-white border-2 border-blue-200 rounded-3xl shadow-lg shadow-blue-100/30 p-6 sm:p-10 w-full max-w-3xl transition-all duration-300">
+        <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-[var(--color-gray-light)] via-white to-[var(--color-gray-light)]">
+            <div className="bg-white/80 backdrop-blur-sm border-2 border-[var(--color-secondary)]/20 rounded-3xl shadow-xl shadow-[var(--color-secondary)]/10 p-6 sm:p-10 w-full max-w-4xl transition-all duration-300">
                 <div className="flex flex-col items-center text-center gap-6">
-                    <h1 className="text-4xl sm:text-4xl font-extrabold text-gray-800 tracking-tight bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] bg-clip-text text-transparent">
-                        Crear Nueva Cita
-                    </h1>
-                    <hr className="w-16 border-t-4 border-gray-300 rounded-full mb-2" />
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-full bg-[var(--color-primary)]/10 border-2 border-[var(--color-primary)]/20">
+                            <svg className="w-8 h-8 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h1 className="text-4xl sm:text-4xl font-extrabold text-[var(--color-primary)] tracking-tight">
+                            Agendar Cita
+                        </h1>
+                    </div>
+                    <p className="text-[var(--color-secondary)]/80 text-lg">Complete el formulario para agendar su cita médica</p>
 
-                    <form
-                        onSubmit={handleSubmit}
-                        className="flex flex-col text-base gap-6 w-full max-w-2xl"
-                    >
+                    <form onSubmit={handleSubmit} className="flex flex-col text-base gap-6 w-full max-w-2xl">
+                        {/* Información Personal */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="flex flex-col text-left gap-2">
+                                <label className="text-[var(--color-secondary)] font-medium">Nombre</label>
+                                <input
+                                    type="text"
+                                    name="nombrePaciente"
+                                    value={formData.nombrePaciente}
+                                    onChange={handleChange}
+                                    className="bg-white/50 rounded-xl px-4 py-3 border-2 border-[var(--color-primary)]/20 focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                                    required
+                                    disabled={cargando}
+                                />
+                            </div>
+
+                            <div className="flex flex-col text-left gap-2">
+                                <label className="text-[var(--color-secondary)] font-medium">Número de Identificación</label>
+                                <input
+                                    type="text"
+                                    name="pacienteId"
+                                    value={formData.pacienteId}
+                                    onChange={handleChange}
+                                    className="bg-white/50 rounded-xl px-4 py-3 border-2 border-[var(--color-primary)]/20 focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                                    required
+                                    disabled={cargando}
+                                />
+                            </div>
+
+                            <div className="flex flex-col text-left gap-2">
+                                <label className="text-[var(--color-secondary)] font-medium">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="bg-white/50 rounded-xl px-4 py-3 border-2 border-[var(--color-primary)]/20 focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                                    required
+                                    disabled={cargando}
+                                />
+                            </div>
+
+                            <div className="flex flex-col text-left gap-2">
+                                <label className="text-[var(--color-secondary)] font-medium">Teléfono</label>
+                                <input
+                                    type="tel"
+                                    name="telefono"
+                                    value={formData.telefono}
+                                    onChange={handleChange}
+                                    className="bg-white/50 rounded-xl px-4 py-3 border-2 border-[var(--color-primary)]/20 focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                                    required
+                                    disabled={cargando}
+                                />
+                            </div>
+                        </div>
+
                         {/* Tipo de Cita */}
                         <div className="flex flex-col text-left gap-2">
-                            <label className="text-gray-700 font-medium">Tipo de Cita</label>
+                            <label className="text-[var(--color-secondary)] font-medium">Tipo de Cita</label>
                             <select
                                 name="tipoCitaId"
                                 value={formData.tipoCitaId}
                                 onChange={handleChange}
-                                className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] transition-all"
+                                className="bg-white/50 rounded-xl px-4 py-3 border-2 border-[var(--color-primary)]/20 focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
                                 required
                                 disabled={cargando}
                             >
@@ -370,7 +415,7 @@ const FormularioCita = () => {
                                 ))}
                             </select>
                             {formData.tipoCitaId && (
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-[var(--color-secondary)]/70">
                                     {tiposCita.find(t => t.id === parseInt(formData.tipoCitaId))?.descripcion}
                                 </p>
                             )}
@@ -378,12 +423,12 @@ const FormularioCita = () => {
 
                         {/* Doctor */}
                         <div className="flex flex-col text-left gap-2">
-                            <label className="text-gray-700 font-medium">Doctor</label>
+                            <label className="text-[var(--color-secondary)] font-medium">Doctor</label>
                             <select
-                                name="odontologoId"
-                                value={formData.odontologoId}
+                                name="doctorId"
+                                value={formData.doctorId}
                                 onChange={handleChange}
-                                className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"
+                                className="bg-white/50 rounded-xl px-4 py-3 border-2 border-[var(--color-primary)]/20 focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
                                 required
                                 disabled={cargando}
                             >
@@ -398,8 +443,8 @@ const FormularioCita = () => {
 
                         {/* Fecha */}
                         <div className="text-left">
-                            <label className="block text-gray-700 font-medium mb-2">Fecha</label>
-                            <div className="bg-white p-2 rounded-xl border border-gray-300">
+                            <label className="block text-[var(--color-secondary)] font-medium mb-2">Fecha</label>
+                            <div className="bg-white/50 p-4 rounded-xl border-2 border-[var(--color-primary)]/20">
                                 <Calendar
                                     onChange={handleFechaSeleccionada}
                                     value={fechaSeleccionada}
@@ -425,12 +470,12 @@ const FormularioCita = () => {
                         {/* Hora */}
                         {fechaSeleccionada && (
                             <div className="flex flex-col text-left gap-2">
-                                <label className="text-gray-700 font-medium">Hora</label>
+                                <label className="text-[var(--color-secondary)] font-medium">Hora</label>
                                 <select
                                     name="hora"
                                     value={formData.hora}
                                     onChange={handleHoraSeleccionada}
-                                    className="bg-white rounded-xl px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"
+                                    className="bg-white/50 rounded-xl px-4 py-3 border-2 border-[var(--color-primary)]/20 focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
                                     required
                                 >
                                     <option value="">Seleccione una hora</option>
@@ -453,8 +498,8 @@ const FormularioCita = () => {
                         <div className="flex flex-col sm:flex-row justify-end gap-4 w-full mt-4">
                             <button
                                 type="button"
-                                onClick={() => navigate('/citas')}
-                                className="px-6 py-2 text-lg rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all"
+                                onClick={() => navigate('/')}
+                                className="px-6 py-3 text-lg rounded-xl bg-[var(--color-gray-light)] text-[var(--color-secondary)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] transition-all"
                                 disabled={cargando}
                             >
                                 Cancelar
@@ -464,21 +509,25 @@ const FormularioCita = () => {
                                 type="submit"
                                 disabled={
                                     cargando ||
-                                    !formData.odontologoId ||
+                                    !formData.nombrePaciente ||
+                                    !formData.pacienteId ||
+                                    !formData.email ||
+                                    !formData.telefono ||
+                                    !formData.doctorId ||
                                     !formData.fecha ||
                                     !formData.hora ||
                                     !formData.tipoCitaId
                                 }
-                                className="px-6 py-2 text-lg rounded-xl text-white bg-[var(--color-primary)] hover:bg-[var(--color-accent)] transition-all disabled:bg-gray-400"
+                                className="px-6 py-3 text-lg rounded-xl text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 transition-all disabled:bg-[var(--color-gray-light)] disabled:text-[var(--color-secondary)]/50"
                             >
-                                {cargando ? "Creando..." : "Crear Cita"}
+                                {cargando ? "Agendando..." : "Agendar Cita"}
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 
-export default FormularioCita;
+export default FormularioCitaPublico; 

@@ -13,10 +13,14 @@ import PerfilDoctor from './pages/perfilDoctor';
 import HistorialMedico from './pages/historialMedicoUsuario';
 import ActualizarUsuario from './pages/actualizarUsuario';
 import HomeDoctor from './pages/HomeDoctor';
+import AgendarCitaPublico from './pages/agendarCitaPublico';
+import CitasNoAuth from './pages/citasNoAuth';
 import { Toaster } from 'react-hot-toast';
 import CitasDoctor from './components/tablaCitasDoctor';
 import FormularioHistorial from './components/FormularioHistorial';
-
+import HomeAdmin from './pages/HomeAdmin';
+import CitasNoAuthAdmin from './pages/CitasNoAuthAdmin';
+import CitasNoAuthDoctor from './pages/CitasNoAuthDoctor';
 
 function App() {
   return (
@@ -54,9 +58,6 @@ function App() {
         {/* Ruta para cambiar la contraseña actual */}
         <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
 
-        {/* Ruta para cambiar la contraseña actual */}
-        <Route path="/cambiarContraseñaActual" element={<CambiarContraseñaActual />} />
-
         {/* Ruta para el perfil del usuario */}
         <Route path="/perfil" element={<Perfil />} />
 
@@ -69,13 +70,30 @@ function App() {
         {/* Ruta para actualizar el usuario */}
         <Route path="/actualizarUsuario" element={<ActualizarUsuario />} />
 
+        {/* Ruta para el dashboard del doctor */}
         <Route path="/homeDoctor" element={<HomeDoctor/>} />
+
+        {/* Ruta para las citas del doctor */}
         <Route path="/citasDoctor" element={<CitasDoctor/>} />
+
+        {/* Ruta para el formulario de historial médico */}
         <Route path="/formularioHistorial" element={<FormularioHistorial/>} />
 
-        {/* Ruta no encontrada (404) */}  
+        {/* Ruta para agendar cita pública */}
+        <Route path="/agendar-cita" element={<AgendarCitaPublico/>} />
 
-        
+        {/* Ruta para citas no autenticadas */}
+        <Route path="/citas-no-auth" element={<CitasNoAuth/>} />
+
+        {/* Ruta para el dashboard del administrador */}
+        <Route path="/homeAdmin" element={<HomeAdmin/>} />
+
+        {/* Nuevas rutas para citas no autenticadas */}
+        <Route path="/admin/citas-no-autenticadas" element={<CitasNoAuthAdmin/>} />
+        <Route path="/doctor/citas-no-autenticadas" element={<CitasNoAuthDoctor/>} />
+
+        {/* Ruta por defecto para manejar rutas no encontradas */}
+        <Route path="*" element={<Home />} />
       </Routes>
     </Router>
   )
