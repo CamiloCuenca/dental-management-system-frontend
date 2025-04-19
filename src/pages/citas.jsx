@@ -5,38 +5,32 @@ import Footer from "../components/footer";
 
 export default function Citas() {
     return (
-        
-        <div>
+        <div className="min-h-screen flex flex-col transition-all duration-300 ease-in-out bg-gradient-to-br from-blue-50 via-blue-50/80 to-blue-50">
         <Header />
-        <div className="container mx-auto p-6 space-y-10">
-          
-
-
-
-            <div className="text-center mb-10">
-                <h1 className="text-3xl font-bold">Gestión de Citas</h1>
-                <p className="text-gray-600">Administra y visualiza las citas de manera eficiente.</p>
-            </div>
-
-            <div className="border-t border-gray-300 my-6"></div>
-
-            <section className="bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-2xl font-semibold mb-4">Agendar Nueva Cita</h2>
+    
+        <main className="container mx-auto px-6 py-10 space-y-16 flex-grow">
+            <section className="text-center space-y-2 animate-fade-in">
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-secondary)]">
+                    Gestión de Citas
+                </h1>
+                <p className="text-gray-600 text-lg sm:text-xl">
+                    Administra y visualiza las citas de manera eficiente y organizada.
+                </p>
+            </section>
+    
+            <section className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-3xl shadow-md p-8 transition-all duration-300 hover:shadow-lg animate-fade-in-up">
                 <FormularioCita />
             </section>
-
-            <div className="border-t border-gray-300 my-6"></div>
-
-            <section className="bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-2xl font-semibold mb-4">Listado de Citas</h2>
+    
+            <section className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-3xl shadow-md p-8 transition-all duration-300 hover:shadow-lg animate-fade-in-up">
+                <h2 className="text-4xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-secondary)]">
+                    Listado de Citas
+                </h2>
                 <TableCitas />
             </section>
-
-            <div className="border-t border-gray-300 my-6"></div>
-            
-           
-        </div>
-         <Footer />
-         </div>
+        </main>
+    
+        <Footer />
+    </div>
     );
 }

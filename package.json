@@ -13,7 +13,9 @@
     "@shadcn/ui": "^0.0.4",
     "@tailwindcss/vite": "^4.0.1",
     "axios": "^1.8.1",
+    "jwt-decode": "^4.0.0",
     "react": "^19.0.0",
+    "react-calendar": "^5.1.0",
     "react-dom": "^19.0.0",
     "react-google-recaptcha": "^3.1.0",
     "react-hot-toast": "^2.5.2",
@@ -21,6 +23,7 @@
     "react-router-dom": "^7.2.0",
     "react-scroll": "^1.9.3",
     "react-slick": "^0.30.3",
+    "react-tooltip": "^5.28.1",
     "sweetalert2": "^11.17.2"
   },
   "devDependencies": {

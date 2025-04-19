@@ -1,23 +1,37 @@
 import { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
-import Swal from 'sweetalert2'; // Importar SweetAlert2
+import Swal from 'sweetalert2'; 
 import imagenLogin from '../assets/imagenLogin.png';
 import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; // Cliente Axios configurado
+import api from "../services/api";
+import TokenService from '../services/tokenService';
+import { jwtDecode } from 'jwt-decode';
 
+
+/**
+ * Componente de formulario para iniciar sesión en la plataforma.
+ *
+ * @component
+ * @example
+ * return (
+ *   <FormularioLogin />
+ * )
+ *
+ * @returns {JSX.Element} Formulario de inicio de sesión.
+ */
 const FormularioLogin = () => {
     const [captchaValido, setCaptchaValido] = useState(false);
     const [usuario, setUsuario] = useState('');
     const [contrasena, setContrasena] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [mensajeError, setMensajeError] = useState('');
-    const navigate = useNavigate(); // Hook para redirigir
+    const navigate = useNavigate(); 
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-    const onChangeCaptcha = (e) => {
-        setCaptchaValido(!!e);
+    const onChangeCaptcha = (value) => {
+        setCaptchaValido(!!value);
     };
 
     const handleUsuarioChange = (e) => {
@@ -30,7 +44,9 @@ const FormularioLogin = () => {
 
     const isButtonEnabled = usuario.trim() !== '' && contrasena.trim() !== '' && captchaValido;
 
-    const login = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
         if (!isButtonEnabled) return;
 
         try {
@@ -41,16 +57,24 @@ const FormularioLogin = () => {
                 headers: { "Content-Type": "application/json" }
             });
 
-            sessionStorage.setItem("token", response.data.token);
+            TokenService.setToken(response.data.token);
 
-            // Mostrar alerta de éxito con SweetAlert2
+            const decodedToken = jwtDecode(response.data.token);
+            const rol = decodedToken.role;
+
             Swal.fire({
                 title: "Inicio de sesión exitoso",
                 text: "Bienvenido a la plataforma",
                 icon: "success",
                 confirmButtonText: "Aceptar"
             }).then(() => {
-                navigate("/"); // Redirigir al home
+                if (rol === "PACIENTE") {
+                    navigate("/");
+                } else if (rol === "DOCTOR") {
+                    navigate("/homeDoctor");
+                } else if (rol == "ADMINISTRATOR") {
+                    navigate("/homeAdmin");
+                }
             });
 
         } catch (error) {
@@ -71,6 +95,7 @@ const FormularioLogin = () => {
 
                     <h1 className="text-5xl font-bold text-[var(--color-secondary)]">Bienvenido</h1>
 
+                    {/* Campo de Usuario */}
                     <div className="flex flex-col text-left gap-1 w-full">
                         <span className="text-lg">Usuario:</span>
                         <input
@@ -82,6 +107,7 @@ const FormularioLogin = () => {
                         />
                     </div>
 
+                    {/* Campo de Contraseña */}
                     <div className="flex flex-col text-left gap-1 w-full">
                         <span className="text-lg">Contraseña:</span>
                         <div className="relative w-full">
@@ -103,15 +129,17 @@ const FormularioLogin = () => {
                         </div>
                     </div>
 
-                   {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
-                        <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
+                    {/* CAPTCHA */}
+                    <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
 
+                    {/* Mensaje de error */}
                     {mensajeError && <p className="text-red-500 text-sm">{mensajeError}</p>}
 
+                    {/* Botón de Ingresar */}
                     <button
                         className={`px-10 py-2 text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
                         disabled={!isButtonEnabled}
-                        onClick={login}
+                        onClick={handleSubmit}
                     >
                         Ingresar
                     </button>

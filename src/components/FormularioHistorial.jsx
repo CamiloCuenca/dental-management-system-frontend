@@ -19,15 +19,6 @@ const FormularioHistorial = ({ onSubmit }) => {
         proximaCita: ''
     });
 
-    // Función para obtener la fecha local en formato YYYY-MM-DD
-    const getLocalDateString = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
     useEffect(() => {
         // Validar autenticación
         const id = TokenService.getUserId();
@@ -45,7 +36,7 @@ const FormularioHistorial = ({ onSubmit }) => {
                 pacienteId: pacienteId || '',
                 odontologoId: odontologoId || '',
                 citaId: citaId || '',
-                fecha: getLocalDateString // Fecha actual
+                fecha: new Date().toISOString().split('T')[0], // Fecha actual
             }));
         }
     }, [navigate, location]);

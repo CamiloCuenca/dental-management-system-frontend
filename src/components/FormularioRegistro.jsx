@@ -6,6 +6,8 @@ import Swal from 'sweetalert2';
 
 
 const FormularioRegistro = () => {
+
+    // Estado para almacenar los valores del formulario
     const [formData, setFormData] = useState({
         identificacion: '',
         primerNombre: '',
@@ -17,23 +19,35 @@ const FormularioRegistro = () => {
         contraseña: '',
         confirmarContraseña: ''
     });
+    // Estado para validar si el captcha es válido
     const [captchaValido, setCaptchaValido] = useState(false);
+
+    // Estado para verificar si el formulario es válido
     const [formValido, setFormValido] = useState(false);
+
+    // Estados para mostrar/ocultar contraseñas
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    // Estado para almacenar los errores de validación
     const [errors, setErrors] = useState({ correo: '', contraseña: '', confirmarContraseña: '' });
+
+    // Estado para mensajes de error o éxito
     const [mensaje, setMensaje] = useState('');
 
+    // Validar el formulario cada vez que cambien los datos o el captcha
     useEffect(() => {
         validateForm();
     }, [formData, captchaValido]);
 
+    // Maneja el cambio de valores en los inputs
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({ ...prevState, [name]: value }));
         validateField(name, value);
     };
 
+    // Validación de campos específicos
     const validateField = (name, value) => {
         let error = '';
 
@@ -56,16 +70,19 @@ const FormularioRegistro = () => {
         setErrors(prevErrors => ({ ...prevErrors, [name]: error }));
     };
 
+    // Verifica si todos los campos están completos y sin errores
     const validateForm = () => {
         const allFieldsFilled = Object.values(formData).every(value => value.trim() !== '');
         const noErrors = Object.values(errors).every(error => error === '');
         setFormValido(allFieldsFilled && noErrors && captchaValido);
     };
 
+    // Maneja el cambio de estado del captcha
     const onChangeCaptcha = (value) => {
         setCaptchaValido(!!value);
     };
 
+    // Manejo del envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -85,14 +102,14 @@ const FormularioRegistro = () => {
         try {
             const response = await api.post('/cuenta/register', payload);
             setMensaje(`Registro exitoso. ID: ${response.data}`);
-             Swal.fire({
-                            icon: 'success',
-                            title: 'Cuenta Creada',
-                            confirmButtonColor: '#3085d6',
-                            confirmButtonText: 'Aceptar'
-                        }).then(() => {
-                            window.location.href = '/activarCuenta'; // Redirige después de aceptar
-                        });
+            Swal.fire({
+                icon: 'success',
+                title: 'Cuenta Creada',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Aceptar'
+            }).then(() => {
+                window.location.href = '/activarCuenta'; // Redirige después de aceptar
+            });
         } catch (error) {
             if (error.response) {
                 setMensaje(`Error: ${error.response.data}`);
@@ -107,16 +124,18 @@ const FormularioRegistro = () => {
             <div className="bg-white p-5 sm:p-7 rounded-2xl shadow-2xl w-full max-w-5xl relative">
                 <button
                     onClick={() => window.history.back()}
-                    className="absolute top-5 left-5 flex items-center gap-2 text-[var(--color-secondary)] hover:underline text-lg"
+                    className="absolute top-1 left-5 flex items-center gap-2 text-[var(--color-secondary)] hover:underline text-lg"
                 >
                     <FaArrowLeft /> Volver
                 </button>
+
 
                 <h1 className="text-3xl sm:text-4xl font-bold text-center mb-2.5 text-[var(--color-secondary)]">Crear una cuenta</h1>
                 <h4 className="text-lg sm:text-xl font-bold text-center mb-2.5 text-[var(--color-secondary)]">Es rápido y sencillo</h4>
                 <hr className="border-t border-gray-600 my-4" />
 
                 <form onSubmit={handleSubmit}>
+                    {/* Aquí van los campos del formulario con validaciones */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {[
                             { label: "Número de identificación*:", type: "number", name: "identificacion", placeholder: "Ingrese su número de identificación" },
@@ -128,14 +147,14 @@ const FormularioRegistro = () => {
                             { label: "Correo electrónico*:", type: "email", name: "correo", className: "sm:col-span-2", error: errors.correo, placeholder: "Ingrese su correo electrónico" }
                         ].map(({ label, type, name, className, placeholder, error }, index) => (
                             <div key={index} className={`flex flex-col ${className || ''}`}>
-                                <span className="text-lg text-left">{label}</span>
+                                <label className="text-pink-600 font-medium">{label}</label>
                                 <input
                                     type={type}
                                     name={name}
                                     value={formData[name]}
                                     placeholder={placeholder}
                                     onChange={handleChange}
-                                    className={`rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)] ${error ? 'border-red-500' : ''}`}
+                                    className={`rounded-md p-2 border-2 outline-none border-gray-300 focus:border-[#D72F8B] hover:border-[#D72F8B] transition-all duration-300 ${error ? 'border-red-500' : ''}`}
                                 />
                                 {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                             </div>
@@ -148,7 +167,7 @@ const FormularioRegistro = () => {
                             { label: "Confirmar contraseña*:", name: "confirmarContraseña", show: showConfirmPassword, setShow: setShowConfirmPassword, error: errors.confirmarContraseña, placeholder: "Ingrese de nuevo la contraseña" }
                         ].map(({ label, name, show, setShow, error, placeholder }, index) => (
                             <div key={index} className="flex flex-col relative">
-                                <span className="text-lg text-left">{label}</span>
+                                <label className="text-pink-600 font-medium">{label}</label>
                                 <div className="relative">
                                     <input
                                         type={show ? "text" : "password"}
@@ -156,7 +175,7 @@ const FormularioRegistro = () => {
                                         placeholder={placeholder}
                                         value={formData[name]}
                                         onChange={handleChange}
-                                        className={`w-full rounded-md p-2 border-2 outline-none focus:border-[var(--color-secondary)] focus:bg-[var(--color-gray-light)] pr-10 ${error ? 'border-red-500' : ''}`}
+                                        className={`w-full rounded-md p-2 border-2 outline-none border-gray-300 focus:border-[#D72F8B] hover:border-[#D72F8B] transition-all duration-300 ${error ? 'border-red-500' : ''}`}
                                     />
                                     <button type="button" onClick={() => setShow(!show)} className="absolute inset-y-0 right-2 flex items-center">
                                         {show ? <FaRegEyeSlash /> : <FaRegEye />}
@@ -170,7 +189,7 @@ const FormularioRegistro = () => {
 
                     <div className='flex items-center justify-center mt-5'>
                         {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
-                        <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha}/> 
+                        <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha} />
                     </div>
 
                     {mensaje && <p className="text-center text-red-500 mt-3">{mensaje}</p>}

@@ -1,16 +1,15 @@
 import Header from "../components/Header";
-import HeroSeccion from "../components/HeroSeccion";
+import ContenidoPerfil from "../components/ContenidoPerfil";
 import Footer from "../components/footer";
-import Inicio from "../components/Inicio"
+
 
 // Componente que representa la página HOME
-export default function Home() {
+export default function Perfil() {
     return (
        <div>
         {/* Renderiza el los comoponentes heades, heroseccion, inicio y footer */}
       <Header />
-      <HeroSeccion />
-      <Inicio />
+      <ContenidoPerfil />
       <Footer />
 
        </div>
