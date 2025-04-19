@@ -38,6 +38,22 @@ export default function Header() {
     };
 
     const handleNavigation = (path) => {
+        if (path === "/") {
+            if (userRole === "DOCTOR") {
+                navigate("/homeDoctor");
+                return;
+            }
+            if (userRole === "ADMINISTRATOR") {
+                navigate("/homeAdmin");
+                return;
+            }
+            if (userRole === "PACIENTE") {
+                navigate("/home");
+                return;
+            }
+            navigate("/");
+            return;
+        }
         if (path === "/citas") {
             if (!isLoggedIn) {
                 navigate("/agendar-cita");
@@ -77,6 +93,9 @@ export default function Header() {
         }
         return null;
     };
+
+
+    
 
     const getRolePrefix = () => {
         if (userRole === "DOCTOR") return "Doctor ";
