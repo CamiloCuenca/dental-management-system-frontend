@@ -1,228 +1,210 @@
 import { useState, useEffect } from 'react';
-import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
-import axios from 'axios';
+import api from '../services/api';
 import TokenService from '../services/tokenService';
+import { toast } from 'react-hot-toast';
+import { FaPhone, FaEnvelope, FaUser, FaCalendarAlt, FaClock, FaStethoscope, FaExclamationTriangle, FaInfoCircle, FaIdCard } from 'react-icons/fa';
 
 const TableCitasNoAuthDoctor = () => {
     const [citas, setCitas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [editingCita, setEditingCita] = useState(null);
-    const [formData, setFormData] = useState({
-        nombrePaciente: '',
-        numeroIdentificacion: '',
-        telefono: '',
-        email: '',
-        fecha: '',
-        hora: '',
-        tipoCitaId: ''
-    });
+    const [hoy, setHoy] = useState("");
 
     useEffect(() => {
+        // Obtener fecha actual en formato YYYY-MM-DD para comparación (sin hora)
+        const fechaActual = new Date();
+        const fechaHoy = formatDateToYYYYMMDD(fechaActual);
+        setHoy(fechaHoy);
+
         fetchCitas();
     }, []);
 
+    // Función para formatear fecha a YYYY-MM-DD (sin hora)
+    const formatDateToYYYYMMDD = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // Función para validar si una cita tiene los datos mínimos requeridos
+    const esCitaValida = (cita) => {
+        return cita && 
+               cita.pacienteNombre && 
+               cita.pacienteNombre.trim() !== '' && 
+               cita.pacienteNombre !== 'null' &&
+               cita.email && 
+               cita.email.trim() !== '' && 
+               cita.email !== 'null' &&
+               cita.telefono && 
+               cita.telefono.trim() !== '' && 
+               cita.telefono !== 'null';
+    };
+
     const fetchCitas = async () => {
+        setLoading(true);
+        setError(null);
+
         try {
-            const doctorId = TokenService.getIdNumber(); // Obtener el ID del doctor del token
-            const response = await axios.get(`/citas-no-autenticadas/doctor/${doctorId}`, {
+            const doctorId = TokenService.getUserId();
+            const response = await api.get(`/citas/doctor-no-autenticadas/${doctorId}`, {
                 headers: {
                     Authorization: `Bearer ${TokenService.getToken()}`
                 }
             });
-            setCitas(response.data);
+            
+            if (response.data && Array.isArray(response.data)) {
+                const citasFormateadas = response.data
+                    .map((cita) => {
+                        const fechaCita = new Date(cita.fechaHora);
+                        return {
+                            ...cita,
+                            fechaHora: fechaCita.toLocaleString("es-ES", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            }),
+                            fechaParaComparacion: formatDateToYYYYMMDD(fechaCita),
+                            fecha: fechaCita.toLocaleDateString("es-ES")
+                        };
+                    })
+                    .filter(esCitaValida); // Filtrar citas inválidas
+
+                console.log('Citas recibidas:', response.data);
+                console.log('Citas válidas:', citasFormateadas);
+
+                setCitas(citasFormateadas);
+                if (citasFormateadas.length === 0) {
+                    toast.info('No hay citas no autenticadas disponibles');
+                }
+            } else {
+                setCitas([]);
+                setError('No se encontraron citas');
+            }
+        } catch (err) {
+            if (err.response) {
+                const statusCode = err.response.status;
+                const errorMessage = err.response.data?.message || 'Error al cargar las citas';
+                
+                if (statusCode === 500) {
+                    setError('Error interno del servidor. Contacte al administrador.');
+                } else {
+                    setError(`Error ${statusCode}: ${errorMessage}`);
+                }
+            } else if (err.request) {
+                setError('No se recibió respuesta del servidor. Verifique que el backend esté corriendo en http://localhost:8081');
+            } else {
+                setError('Error al realizar la petición: ' + err.message);
+            }
+            setCitas([]);
+        } finally {
             setLoading(false);
-        } catch (err) {
-            setError('Error al cargar las citas');
-            setLoading(false);
         }
     };
 
-    const handleEdit = (cita) => {
-        setEditingCita(cita);
-        setFormData({
-            nombrePaciente: cita.nombrePacienteNoAutenticado,
-            numeroIdentificacion: cita.numeroIdentificacionNoAutenticado,
-            telefono: cita.telefonoNoAutenticado,
-            email: cita.emailNoAutenticado,
-            fecha: new Date(cita.fechaHora).toISOString().split('T')[0],
-            hora: new Date(cita.fechaHora).toTimeString().split(' ')[0].substring(0, 5),
-            tipoCitaId: cita.tipoCita.id
-        });
-    };
-
-    const handleUpdate = async () => {
-        try {
-            await axios.put(`/citas-no-autenticadas/${editingCita.id}/doctor`, formData, {
-                headers: {
-                    Authorization: `Bearer ${TokenService.getToken()}`
-                }
-            });
-            fetchCitas();
-            setEditingCita(null);
-        } catch (err) {
-            setError('Error al actualizar la cita');
+    const getEstadoClass = (estado) => {
+        switch (estado) {
+            case "CANCELADA":
+                return "bg-red-500 text-white px-3 py-1 rounded-lg";
+            case "CONFIRMADA":
+                return "bg-green-500 text-white px-3 py-1 rounded-lg";
+            case "PENDIENTE":
+                return "bg-yellow-500 text-black px-3 py-1 rounded-lg";
+            case "COMPLETADA":
+                return "bg-blue-500 text-white px-3 py-1 rounded-lg";
+            default:
+                return "bg-gray-300 text-black px-3 py-1 rounded-lg";
         }
     };
-
-    const handleChangeEstado = async (id, nuevoEstado) => {
-        try {
-            await axios.put(`/citas-no-autenticadas/${id}/estado/doctor`, { estado: nuevoEstado }, {
-                headers: {
-                    Authorization: `Bearer ${TokenService.getToken()}`
-                }
-            });
-            fetchCitas();
-        } catch (err) {
-            setError('Error al cambiar el estado de la cita');
-        }
-    };
-
-    if (loading) return <div className="text-center">Cargando...</div>;
-    if (error) return <div className="text-red-500 text-center">{error}</div>;
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h2 className="text-2xl font-bold mb-6">Mis Citas No Autenticadas</h2>
-            
-            <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-300">
-                    <thead>
-                        <tr className="bg-gray-100">
-                            <th className="py-2 px-4 border">Paciente</th>
-                            <th className="py-2 px-4 border">Identificación</th>
-                            <th className="py-2 px-4 border">Teléfono</th>
-                            <th className="py-2 px-4 border">Email</th>
-                            <th className="py-2 px-4 border">Fecha y Hora</th>
-                            <th className="py-2 px-4 border">Tipo</th>
-                            <th className="py-2 px-4 border">Estado</th>
-                            <th className="py-2 px-4 border">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {citas.map((cita) => (
-                            <tr key={cita.id} className="hover:bg-gray-50">
-                                <td className="py-2 px-4 border">
-                                    {editingCita?.id === cita.id ? (
-                                        <input
-                                            type="text"
-                                            value={formData.nombrePaciente}
-                                            onChange={(e) => setFormData({...formData, nombrePaciente: e.target.value})}
-                                            className="border rounded px-2 py-1"
-                                        />
-                                    ) : (
-                                        cita.nombrePacienteNoAutenticado
-                                    )}
-                                </td>
-                                <td className="py-2 px-4 border">
-                                    {editingCita?.id === cita.id ? (
-                                        <input
-                                            type="text"
-                                            value={formData.numeroIdentificacion}
-                                            onChange={(e) => setFormData({...formData, numeroIdentificacion: e.target.value})}
-                                            className="border rounded px-2 py-1"
-                                        />
-                                    ) : (
-                                        cita.numeroIdentificacionNoAutenticado
-                                    )}
-                                </td>
-                                <td className="py-2 px-4 border">
-                                    {editingCita?.id === cita.id ? (
-                                        <input
-                                            type="text"
-                                            value={formData.telefono}
-                                            onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-                                            className="border rounded px-2 py-1"
-                                        />
-                                    ) : (
-                                        cita.telefonoNoAutenticado
-                                    )}
-                                </td>
-                                <td className="py-2 px-4 border">
-                                    {editingCita?.id === cita.id ? (
-                                        <input
-                                            type="email"
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                            className="border rounded px-2 py-1"
-                                        />
-                                    ) : (
-                                        cita.emailNoAutenticado
-                                    )}
-                                </td>
-                                <td className="py-2 px-4 border">
-                                    {editingCita?.id === cita.id ? (
-                                        <div className="flex space-x-2">
-                                            <input
-                                                type="date"
-                                                value={formData.fecha}
-                                                onChange={(e) => setFormData({...formData, fecha: e.target.value})}
-                                                className="border rounded px-2 py-1"
-                                            />
-                                            <input
-                                                type="time"
-                                                value={formData.hora}
-                                                onChange={(e) => setFormData({...formData, hora: e.target.value})}
-                                                className="border rounded px-2 py-1"
-                                            />
+        <div className="p-6 bg-grayLight min-h-screen flex flex-col items-center">
+            <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-7xl h-[85vh] flex flex-col">
+                <h2 className="text-2xl font-bold text-secondary mb-4 text-center">🩺 Citas No Autenticadas</h2>
+                
+                {error && (
+                    <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                        <div className="flex items-center">
+                            <FaExclamationTriangle className="text-red-500 mr-2" />
+                            <p className="text-red-700">{error}</p>
+                        </div>
+                        <button
+                            onClick={fetchCitas}
+                            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                        >
+                            Intentar nuevamente
+                        </button>
+                    </div>
+                )}
+
+                <div className="flex-1 overflow-y-auto">
+                    {loading ? (
+                        <div className="flex justify-center items-center h-full">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                        </div>
+                    ) : citas.length === 0 ? (
+                        <div className="text-center py-8">
+                            <div className="flex justify-center mb-4">
+                                <FaInfoCircle className="text-gray-400 text-4xl" />
+                            </div>
+                            <p className="text-gray-500 text-lg">No hay citas no autenticadas asignadas</p>
+                            <p className="text-gray-400 text-sm mt-2">Las citas no autenticadas aparecerán aquí cuando sean asignadas</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {citas.map((cita) => (
+                                <div key={cita.id} className="bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Información del Paciente */}
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <FaUser className="text-primary" />
+                                                <span className="font-semibold">{cita.pacienteNombre}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FaIdCard className="text-primary" />
+                                                <span>{cita.pacienteId || "No especificado"}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FaEnvelope className="text-primary" />
+                                                <span>{cita.email}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FaPhone className="text-primary" />
+                                                <span>{cita.telefono}</span>
+                                            </div>
                                         </div>
-                                    ) : (
-                                        new Date(cita.fechaHora).toLocaleString()
-                                    )}
-                                </td>
-                                <td className="py-2 px-4 border">
-                                    {editingCita?.id === cita.id ? (
-                                        <input
-                                            type="text"
-                                            value={formData.tipoCitaId}
-                                            onChange={(e) => setFormData({...formData, tipoCitaId: e.target.value})}
-                                            className="border rounded px-2 py-1"
-                                        />
-                                    ) : (
-                                        cita.tipoCita.nombre
-                                    )}
-                                </td>
-                                <td className="py-2 px-4 border">
-                                    <select
-                                        value={cita.estado}
-                                        onChange={(e) => handleChangeEstado(cita.id, e.target.value)}
-                                        className="border rounded px-2 py-1"
-                                    >
-                                        <option value="PENDIENTE">Pendiente</option>
-                                        <option value="CONFIRMADA">Confirmada</option>
-                                        <option value="CANCELADA">Cancelada</option>
-                                        <option value="COMPLETADA">Completada</option>
-                                    </select>
-                                </td>
-                                <td className="py-2 px-4 border">
-                                    {editingCita?.id === cita.id ? (
-                                        <div className="flex space-x-2">
-                                            <button
-                                                onClick={handleUpdate}
-                                                className="text-green-500 hover:text-green-700"
-                                            >
-                                                <FaCheck />
-                                            </button>
-                                            <button
-                                                onClick={() => setEditingCita(null)}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <FaTimes />
-                                            </button>
+
+                                        {/* Información de la Cita */}
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <FaCalendarAlt className="text-primary" />
+                                                <span>{cita.fechaHora}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FaClock className="text-primary" />
+                                                <span>{cita.duracionMinutos || "No especificado"} minutos</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FaStethoscope className="text-primary" />
+                                                <span>{cita.tipoCitaNombre || "No especificado"}</span>
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <button
-                                            onClick={() => handleEdit(cita)}
-                                            className="text-blue-500 hover:text-blue-700"
-                                        >
-                                            <FaEdit />
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                    </div>
+
+                                    {/* Estado */}
+                                    <div className="mt-4">
+                                        <span className={`${getEstadoClass(cita.estado)} font-medium shadow px-3 py-1 inline-block`}>
+                                            {cita.estado || "No especificado"}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
