@@ -126,7 +126,7 @@ const TableCitasNoAuthAdmin = () => {
     return (
         <div className="min-h-screen bg-white p-8 flex flex-col items-center">
             <div className="bg-white border-2 border-[var(--color-secondary)]/20 rounded-3xl shadow-xl shadow-[var(--color-secondary)]/10 p-8 w-full max-w-[95vw] xl:max-w-[90vw] 2xl:max-w-[85vw] h-[85vh] flex flex-col transition-all duration-300 ease-in-out">
-                <h2 className="text-3xl font-extrabold text-primary text-center mb-6 tracking-wide">
+                <h2 className="text-3xl font-extrabold text-secondary text-center mb-6 tracking-wide">
                     🦷 Búsqueda de Citas No Autenticadas 🦷
                 </h2>
 

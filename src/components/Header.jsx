@@ -94,8 +94,24 @@ export default function Header() {
         return null;
     };
 
-
-    
+    const getDoctorLinks = () => {
+        if (userRole === "DOCTOR") {
+            return (
+                <>
+                    <li className="relative group">
+                        <button
+                            onClick={() => handleNavigation("/doctor/citas-no-autenticadas")}
+                            className={getLinkClass("/doctor/citas-no-autenticadas")}
+                        >
+                            Citas No Autenticadas
+                        </button>
+                        <span className="absolute left-0 bottom-0 w-0 h-[3px] bg-accent transition-all duration-300 group-hover:w-full"></span>
+                    </li>
+                </>
+            );
+        }
+        return null;
+    };
 
     const getRolePrefix = () => {
         if (userRole === "DOCTOR") return "Doctor ";
@@ -130,6 +146,7 @@ export default function Header() {
                         </li>
                     ))}
                     {getAdminLinks()}
+                    {getDoctorLinks()}
                 </ul>
 
                 {/* Botones de usuario */}
@@ -220,6 +237,14 @@ export default function Header() {
                             className="block text-xl font-semibold hover:text-accent transition-all duration-300"
                         >
                             Gestión de Citas
+                        </button>
+                    )}
+                    {userRole === "DOCTOR" && (
+                        <button
+                            onClick={() => handleNavigation("/doctor/citas-no-autenticadas")}
+                            className="block text-xl font-semibold hover:text-accent transition-all duration-300"
+                        >
+                            Citas No Autenticadas
                         </button>
                     )}
                     {isLoggedIn ? (
