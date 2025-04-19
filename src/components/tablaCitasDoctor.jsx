@@ -3,7 +3,7 @@ import api from "../services/api";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import TokenService from "../services/tokenService";
-import { FaPhone, FaEnvelope, FaUser, FaCalendarAlt, FaClock, FaStethoscope, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
+import { FaPhone, FaEnvelope, FaUser, FaCalendarAlt, FaClock, FaStethoscope, FaExclamationTriangle, FaInfoCircle, FaIdCard } from "react-icons/fa";
 
 const CitasDoctor = () => {
   const navigate = useNavigate();
@@ -202,6 +202,13 @@ const CitasDoctor = () => {
                         <FaUser className="text-primary" />
                         <span className="font-semibold">{cita.pacienteNombre}</span>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <FaIdCard className="text-primary" />
+                        <span className="">{cita.pacienteId}</span>
+                      </div>
+
+
+                      
                       <div className="flex items-center gap-2">
                         <FaEnvelope className="text-primary" />
                         <span>{cita.email || "No especificado"}</span>
