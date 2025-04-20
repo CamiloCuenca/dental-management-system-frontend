@@ -1,17 +1,19 @@
 const Card = ({ image, title, description, buttonText, redirectTo, imageAlt }) => {
   return (
     <div className="flex flex-col md:flex-row shadow-2xl w-full max-w-4xl rounded-2xl overflow-hidden bg-white">
-      {/* Imagen - siempre visible en desktop, oculta en móvil */}
-      <div className="hidden md:block md:w-2/5">
-        <img
-          src={image}
-          alt={imageAlt}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      {/* Imagen - solo visible en desktop (md y arriba) */}
+      {image && (
+        <div className="hidden md:block md:w-2/5">
+          <img
+            src={image}
+            alt={imageAlt}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
       
-      {/* Contenido */}
-      <div className="flex flex-col items-center justify-center text-center p-8 md:p-12 gap-6 w-full md:w-3/5">
+      {/* Contenido - ocupa todo el ancho en móvil, 3/5 en desktop */}
+      <div className={`flex flex-col items-center justify-center text-center p-8 md:p-12 gap-6 ${image ? 'w-full md:w-3/5' : 'w-full'}`}>
         <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-secondary)]">
           {title}
         </h1>
