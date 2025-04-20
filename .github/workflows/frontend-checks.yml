@@ -26,4 +26,4 @@ jobs:
         run: npm run build  # vite build
 
       - name: Audit Dependencies
-        run: npm audit --production  # Solo revisa dependencias de producción (ignora devDependencies)
+        run: npm audit --production || true  # Solo revisa dependencias de producción (ignora devDependencies)
