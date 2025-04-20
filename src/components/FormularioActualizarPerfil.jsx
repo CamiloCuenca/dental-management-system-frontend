@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const FormularioActualizarPerfil = () => {
   const [formData, setFormData] = useState({
@@ -10,42 +10,77 @@ const FormularioActualizarPerfil = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  // Validar todo el formulario cuando cambien los errores
+  useEffect(() => {
+    const hasErrors = Object.values(errors).some(error => error !== "");
+    const allFieldsFilled = Object.values(formData).every(field => field.trim() !== "");
+    setIsFormValid(!hasErrors && allFieldsFilled);
+  }, [errors, formData]);
 
   const validateField = (name, value) => {
     let error = "";
 
     if (name === "name" || name === "lastName") {
-      const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/;
-      error = nameRegex.test(value) ? "" : "Solo se permiten letras y espacios";
+      const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s']+$/;
+      if (!value.trim()) {
+        error = "Este campo es requerido";
+      } else if (!nameRegex.test(value)) {
+        error = "Solo se permiten letras y espacios";
+      }
     }
 
     if (name === "phoneNumber") {
-      const phoneRegex = /^\d{10}$/;
-      error = phoneRegex.test(value) ? "" : "Debe contener 10 dígitos";
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!value.trim()) {
+        error = "Este campo es requerido";
+      } else if (!phoneRegex.test(value)) {
+        error = "Debe contener exactamente 10 dígitos";
+      }
     }
 
     if (name === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      error = emailRegex.test(value) ? "" : "Correo electrónico inválido";
+      if (!value.trim()) {
+        error = "Este campo es requerido";
+      } else if (!emailRegex.test(value)) {
+        error = "Correo electrónico inválido";
+      }
     }
 
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+    if (name === "address" && !value.trim()) {
+      error = "Este campo es requerido";
+    }
+
+    setErrors(prevErrors => ({ ...prevErrors, [name]: error }));
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
+    
+    // Filtro especial para el campo de teléfono
+    let processedValue = value;
+    if (name === "phoneNumber") {
+      // Eliminar cualquier caracter que no sea número
+      processedValue = value.replace(/\D/g, '');
+      // Limitar a 10 caracteres
+      processedValue = processedValue.slice(0, 10);
+    }
+    
+    setFormData(prevData => ({
       ...prevData,
-      [name]: value
+      [name]: processedValue
     }));
-    validateField(name, value);
+    
+    validateField(name, processedValue);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const hasErrors = Object.values(errors).some((error) => error !== "");
-    if (!hasErrors) {
+    if (isFormValid) {
       console.log("Datos actualizados", formData);
+      // Aquí iría la llamada a tu API
     }
   };
 
@@ -67,9 +102,8 @@ const FormularioActualizarPerfil = () => {
                   onChange={handleInputChange}
                   className="w-full px-6 py-3 rounded-md border border-gray-300 text-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Ingresa tu nombre"
-                  required
                 />
-                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
 
               <div>
@@ -81,23 +115,23 @@ const FormularioActualizarPerfil = () => {
                   onChange={handleInputChange}
                   className="w-full px-6 py-3 rounded-md border border-gray-300 text-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Ingresa tus apellidos"
-                  required
                 />
-                {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
+                {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-600 mb-2">Número de Teléfono</label>
                 <input
-                  type="text"
+                  type="tel"  // Cambiado a type="tel" para mejor soporte en móviles
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
                   className="w-full px-6 py-3 rounded-md border border-gray-300 text-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Ingresa tu teléfono"
-                  required
+                  inputMode="numeric"  // Muestra teclado numérico en móviles
+                  pattern="[0-9]{10}"  // Ayuda a la validación nativa
                 />
-                {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
+                {errors.phoneNumber && <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>}
               </div>
 
               <div>
@@ -109,9 +143,8 @@ const FormularioActualizarPerfil = () => {
                   onChange={handleInputChange}
                   className="w-full px-6 py-3 rounded-md border border-gray-300 text-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Ingresa tu correo"
-                  required
                 />
-                {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
 
               <div className="md:col-span-2">
@@ -123,25 +156,28 @@ const FormularioActualizarPerfil = () => {
                   onChange={handleInputChange}
                   className="w-full px-6 py-3 rounded-md border border-gray-300 text-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Ingresa tu dirección"
-                  required
                 />
+                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
               </div>
             </div>
 
             <div className="mt-6 flex justify-end gap-4">
-              <a href="#" onClick={() => window.history.back()} className="w-full sm:w-auto">
-                <button
-                  type="button"
-                  className="px-6 py-3 text-xl sm:text-2xl rounded-md text-white bg-gray-400 hover:bg-gray-500 transition-all duration-300"
-                >
-                  Cancelar
-                </button>
-              </a>
+              <button
+                type="button"
+                onClick={() => window.history.back()}
+                className="px-6 py-3 text-xl sm:text-2xl rounded-md text-white bg-gray-400 hover:bg-gray-500 transition-all duration-300"
+              >
+                Cancelar
+              </button>
               
               <button
                 type="submit"
-                className="px-6 py-3 text-xl sm:text-2xl rounded-md text-white bg-blue-500 hover:bg-blue-600 transition-all duration-300"
-                disabled={Object.values(errors).some(error => error !== "")}
+                className={`px-6 py-3 text-xl sm:text-2xl rounded-md text-white transition-all duration-300 ${
+                  isFormValid 
+                    ? "bg-blue-500 hover:bg-blue-600" 
+                    : "bg-blue-300 cursor-not-allowed"
+                }`}
+                disabled={!isFormValid}
               >
                 Guardar Cambios
               </button>

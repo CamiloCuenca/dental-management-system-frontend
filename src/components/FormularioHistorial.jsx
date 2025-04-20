@@ -54,7 +54,7 @@ const FormularioHistorial = ({ onSubmit }) => {
             const response = await api.post('/historiales/crear', formulario);
             console.log("✅ Historial creado:", response.data);
             alert("Historial médico guardado con éxito");
-            navigate("/historiales");
+            navigate("/homeDoctor");
         } catch (error) {
             console.error("❌ Error al crear historial:", error.response?.data || error.message);
             alert("Error al guardar el historial");
