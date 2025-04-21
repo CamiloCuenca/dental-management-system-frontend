@@ -3,6 +3,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import api from "../services/api"; // Cliente Axios configurado
 import Swal from 'sweetalert2';
+import { toast } from "react-hot-toast";
 
 
 const FormularioRegistro = () => {
@@ -83,41 +84,56 @@ const FormularioRegistro = () => {
     };
 
     // Manejo del envío del formulario
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+   // Manejo del envío del formulario
+const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        if (!formValido) return;
+    if (!formValido) return;
 
-        const payload = {
-            idNumber: formData.identificacion,
-            name: formData.primerNombre,
-            lastName: formData.primerApellido,
-            phoneNumber: formData.telefono,
-            address: formData.direccion,
-            fechaNacimiento: formData.fechaNacimiento,
-            email: formData.correo,
-            password: formData.contraseña
-        };
+    const payload = {
+        idNumber: formData.identificacion,
+        name: formData.primerNombre,
+        lastName: formData.primerApellido,
+        phoneNumber: formData.telefono,
+        address: formData.direccion,
+        fechaNacimiento: formData.fechaNacimiento,
+        email: formData.correo,
+        password: formData.contraseña
+    };
 
-        try {
-            const response = await api.post('/cuenta/register', payload);
-            setMensaje(`Registro exitoso. ID: ${response.data}`);
-            Swal.fire({
-                icon: 'success',
-                title: 'Cuenta Creada',
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'Aceptar'
-            }).then(() => {
-                window.location.href = '/activarCuenta'; // Redirige después de aceptar
-            });
-        } catch (error) {
-            if (error.response) {
-                setMensaje(`Error: ${error.response.data}`);
+    try {
+        const response = await api.post('/cuenta/register', payload);
+        setMensaje(`Registro exitoso. ID: ${response.data}`);
+        Swal.fire({
+            icon: 'success',
+            title: 'Cuenta Creada',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Aceptar'
+        }).then(() => {
+            window.location.href = '/activarCuenta'; // Redirige después de aceptar
+        });
+    } catch (error) {
+        let errorMessage = 'Error al registrar la cuenta.'; // Mensaje por defecto
+        
+        if (error.response) {
+            // Manejo específico para error 409 (Conflicto - Usuario ya existe)
+            if (error.response.status === 409) {
+                errorMessage = 'El usuario con este número de identificación ya se encuentra registrado';
             } else {
-                setMensaje('Error al registrar la cuenta.');
+                errorMessage = `Error: ${error.response.data}`;
             }
         }
-    };
+        
+        setMensaje(errorMessage);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en el registro',
+            text: errorMessage,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Entendido'
+        });
+    }
+};
 
     return (
         <section className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] p-5 sm:p-10">

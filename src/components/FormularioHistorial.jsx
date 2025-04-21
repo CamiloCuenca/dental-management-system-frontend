@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { DateTime } from 'luxon';
 import TokenService from '../services/tokenService'; 
 import api from "../services/api";
 
 const FormularioHistorial = ({ onSubmit }) => {
     const navigate = useNavigate();
-    const location = useLocation(); // <--- ESTE hook siempre al tope
+    const location = useLocation();
 
     const [userId, setUserId] = useState(null);
     const [formulario, setFormulario] = useState({
@@ -20,7 +21,6 @@ const FormularioHistorial = ({ onSubmit }) => {
     });
 
     useEffect(() => {
-        // Validar autenticación
         const id = TokenService.getUserId();
         if (!TokenService.isAuthenticated() || !id) {
             navigate('/login');
@@ -28,15 +28,15 @@ const FormularioHistorial = ({ onSubmit }) => {
         }
         setUserId(id);
 
-        // Si location.state trae datos, llenar los campos
         if (location.state) {
             const { pacienteId, odontologoId, citaId } = location.state;
+            const fechaActual = DateTime.local().toISODate(); // Luxon aquí
             setFormulario((prev) => ({
                 ...prev,
                 pacienteId: pacienteId || '',
                 odontologoId: odontologoId || '',
                 citaId: citaId || '',
-                fecha: new Date().toISOString().split('T')[0], // Fecha actual
+                fecha: fechaActual,
             }));
         }
     }, [navigate, location]);
@@ -54,12 +54,13 @@ const FormularioHistorial = ({ onSubmit }) => {
             const response = await api.post('/historiales/crear', formulario);
             console.log("✅ Historial creado:", response.data);
             alert("Historial médico guardado con éxito");
-            navigate("/historiales");
+            navigate("/homeDoctor");
         } catch (error) {
             console.error("❌ Error al crear historial:", error.response?.data || error.message);
             alert("Error al guardar el historial");
         }
     };
+
     return (
         <form
             onSubmit={handleSubmit}
@@ -67,7 +68,6 @@ const FormularioHistorial = ({ onSubmit }) => {
         >
             <h2 className="text-2xl font-bold text-secondary text-center">📝 Historial Médico</h2>
 
-            {/* Sección 1: Datos del Paciente y Odontólogo */}
             <fieldset className="border border-gray-200 p-4 rounded">
                 <legend className="text-lg font-semibold text-gray-700">👤 Información Básica</legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
@@ -96,7 +96,6 @@ const FormularioHistorial = ({ onSubmit }) => {
                 </div>
             </fieldset>
 
-            {/* Sección 2: Información de la Cita */}
             <fieldset className="border border-gray-200 p-4 rounded">
                 <legend className="text-lg font-semibold text-gray-700">📅 Información de la Cita</legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
@@ -125,7 +124,6 @@ const FormularioHistorial = ({ onSubmit }) => {
                 </div>
             </fieldset>
 
-            {/* Sección 3: Detalles Médicos */}
             <fieldset className="border border-gray-200 p-4 rounded">
                 <legend className="text-lg font-semibold text-gray-700">🩺 Detalles Médicos</legend>
                 <div className="mt-2 space-y-4">

@@ -1,0 +1,29 @@
+name: Frontend Quality Checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]  # Se ejecuta al hacer push directo
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20" 
+          cache: "npm"  # Habilita caché automático de npm
+
+      - name: Install Dependencies
+        run: npm ci  # Instala exactamente lo de package-lock.json
+
+      - name: Run ESLint
+        run: npm run lint  # Usa tu script existente (eslint .)
+
+      - name: Build Project
+        run: npm run build  # vite build
+
+      - name: Audit Dependencies
+        run: npm audit --production || true  # Solo revisa dependencias de producción (ignora devDependencies)
