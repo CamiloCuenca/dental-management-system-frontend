@@ -120,7 +120,7 @@ export default function Header() {
     };
 
     return (
-        <header className="bg-secondary shadow-lg">
+        <header className="bg-secondary shadow-lg fixed top-0 w-full z-50">
             <nav className="text-white py-4 px-6 flex items-center justify-between">
                 {/* Logo estilizado con efecto glow */}
                 <button
