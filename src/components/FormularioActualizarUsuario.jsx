@@ -13,17 +13,18 @@ const FormularioActualizarUsuario = () => {
         address: "",
         email: ""
     });
+    const [errors, setErrors] = useState({});
     const [cargando, setCargando] = useState(false);
     const [accountId, setAccountId] = useState(null);
+    const [isFormValid, setIsFormValid] = useState(false);
+    const [initialData, setInitialData] = useState({});
 
     useEffect(() => {
-        // Verificar autenticación
         if (!TokenService.isAuthenticated()) {
             navigate('/login');
             return;
         }
 
-        // Obtener ID de la cuenta desde el token
         const id = TokenService.getAccountId();
         if (!id) {
             navigate('/login');
@@ -31,18 +32,19 @@ const FormularioActualizarUsuario = () => {
         }
         setAccountId(id);
 
-        // Obtener datos actuales del usuario
         const obtenerDatosUsuario = async () => {
             try {
                 const response = await api.get(`/cuenta/perfil/${id}`);
                 const perfilData = response.data;
-                setFormData({
+                const initialValues = {
                     name: perfilData.name || "",
                     lastName: perfilData.lastName || "",
                     phoneNumber: perfilData.phoneNumber || "",
                     address: perfilData.address || "",
                     email: perfilData.email || ""
-                });
+                };
+                setFormData(initialValues);
+                setInitialData(initialValues);
             } catch (error) {
                 console.error('Error al obtener datos del usuario:', error);
                 Swal.fire({
@@ -57,57 +59,97 @@ const FormularioActualizarUsuario = () => {
         obtenerDatosUsuario();
     }, [navigate]);
 
+    const validateField = (name, value) => {
+        let error = "";
+
+        if (name === "name" || name === "lastName") {
+            const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s']+$/;
+            if (!value.trim()) {
+                error = "Este campo es requerido";
+            } else if (!nameRegex.test(value)) {
+                error = "Solo se permiten letras y espacios";
+            }
+        }
+
+        if (name === "phoneNumber") {
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!value.trim()) {
+                error = "Este campo es requerido";
+            } else if (!phoneRegex.test(value)) {
+                error = "Debe contener exactamente 10 dígitos";
+            }
+        }
+
+        if (name === "email") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!value.trim()) {
+                error = "Este campo es requerido";
+            } else if (!emailRegex.test(value)) {
+                error = "Correo electrónico inválido";
+            }
+        }
+
+        if (name === "address" && !value.trim()) {
+            error = "Este campo es requerido";
+        }
+
+        setErrors(prevErrors => ({ ...prevErrors, [name]: error }));
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
+        
+        // Filtro especial para el campo de teléfono
+        let processedValue = value;
+        if (name === "phoneNumber") {
+            processedValue = value.replace(/\D/g, '').slice(0, 10);
+        }
+        
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: processedValue
         }));
+        
+        validateField(name, processedValue);
     };
+
+    useEffect(() => {
+        // Verificar si hay cambios en los datos
+        const hasChanges = Object.keys(formData).some(
+            key => formData[key] !== initialData[key]
+        );
+        
+        // Verificar si hay errores
+        const hasErrors = Object.values(errors).some(error => error !== "");
+        
+        // Verificar si todos los campos requeridos están llenos
+        const allFieldsFilled = Object.values(formData).every(
+            field => field.trim() !== ""
+        );
+        
+        setIsFormValid(hasChanges && !hasErrors && allFieldsFilled);
+    }, [formData, errors, initialData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setCargando(true);
 
         try {
-            // Validar que al menos un campo haya sido modificado
-            if (!isFormValid()) {
+            if (!isFormValid) {
                 await Swal.fire({
                     icon: 'warning',
-                    title: 'Campos vacíos',
-                    text: 'Debe modificar al menos un campo para actualizar su información.'
-                });
-                return;
-            }
-
-            // Validar formato de teléfono si se está actualizando
-            if (formData.phoneNumber && !formData.phoneNumber.match(/^\d{10}$/)) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'El número de teléfono debe contener exactamente 10 dígitos.'
-                });
-                return;
-            }
-
-            // Validar formato de email si se está actualizando
-            if (formData.email && !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Por favor, ingrese un email válido.'
+                    title: 'Formulario inválido',
+                    text: 'Por favor complete todos los campos correctamente.'
                 });
                 return;
             }
 
             const response = await api.put(`/cuenta/usuario/${accountId}`, formData);
 
-            // Actualizar el token con la nueva información
             if (response.data.token) {
                 TokenService.setToken(response.data.token);
             }
 
-            // Mostrar mensaje de éxito
             await Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
@@ -116,7 +158,6 @@ const FormularioActualizarUsuario = () => {
                 showConfirmButton: false
             });
 
-            // Redirigir al perfil
             navigate('/perfil');
         } catch (error) {
             console.error('Error al actualizar usuario:', error);
@@ -128,10 +169,6 @@ const FormularioActualizarUsuario = () => {
         } finally {
             setCargando(false);
         }
-    };
-
-    const isFormValid = () => {
-        return Object.values(formData).some(value => value !== "");
     };
 
     if (!accountId) return null;
@@ -162,8 +199,8 @@ const FormularioActualizarUsuario = () => {
                                     value={formData.name}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-gray-light)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:bg-white transition-all duration-300 ease-in-out shadow-sm"
-                                    required
                                 />
+                                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                             </div>
 
                             <div className="space-y-2">
@@ -174,8 +211,8 @@ const FormularioActualizarUsuario = () => {
                                     value={formData.lastName}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-gray-light)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:bg-white transition-all duration-300 ease-in-out shadow-sm"
-                                    required
                                 />
+                                {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
                             </div>
 
                             <div className="space-y-2">
@@ -186,8 +223,9 @@ const FormularioActualizarUsuario = () => {
                                     value={formData.phoneNumber}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-gray-light)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:bg-white transition-all duration-300 ease-in-out shadow-sm"
-                                    required
+                                    inputMode="numeric"
                                 />
+                                {errors.phoneNumber && <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>}
                             </div>
 
                             <div className="space-y-2">
@@ -198,8 +236,8 @@ const FormularioActualizarUsuario = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-gray-light)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:bg-white transition-all duration-300 ease-in-out shadow-sm"
-                                    required
                                 />
+                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                             </div>
                         </div>
 
@@ -211,8 +249,8 @@ const FormularioActualizarUsuario = () => {
                                 value={formData.address}
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 rounded-lg border-2 border-[var(--color-gray-light)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-accent)] focus:bg-white transition-all duration-300 ease-in-out shadow-sm"
-                                required
                             />
+                            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                         </div>
 
                         <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
@@ -226,9 +264,9 @@ const FormularioActualizarUsuario = () => {
                             
                             <button
                                 type="submit"
-                                disabled={cargando}
+                                disabled={cargando || !isFormValid}
                                 className={`px-6 py-3 text-white rounded-lg transition-all duration-300 font-medium shadow-sm hover:shadow-md ${
-                                    cargando 
+                                    cargando || !isFormValid
                                         ? 'bg-gray-400 cursor-not-allowed' 
                                         : 'bg-[var(--color-secondary)] hover:bg-[var(--color-primary)]'
                                 }`}
@@ -243,4 +281,4 @@ const FormularioActualizarUsuario = () => {
     );
 };
 
-export default FormularioActualizarUsuario; 
+export default FormularioActualizarUsuario;
