@@ -1,38 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../services/api";
 import { Trash2 } from "lucide-react";
-
-const doctoresMock = [
-  {
-    id: 1,
-    identificacion: "123456789",
-    nombres: "Carlos",
-    apellidos: "Pérez",
-    direccion: "Calle 123 #45-67",
-    fechaNacimiento: "1980-05-15",
-    telefono: "3111234567",
-    correoElectronico: "carlos.perez@example.com",
-  },
-  {
-    id: 2,
-    identificacion: "987654321",
-    nombres: "Ana María",
-    apellidos: "Rodríguez",
-    direccion: "Carrera 10 #20-30",
-    fechaNacimiento: "1975-10-08",
-    telefono: "3207654321",
-    correoElectronico: "ana.rodriguez@example.com",
-  },
-  {
-    id: 3,
-    identificacion: "456123789",
-    nombres: "Juan",
-    apellidos: "Gómez",
-    direccion: "Av. Siempre Viva 742",
-    fechaNacimiento: "1990-02-25",
-    telefono: "3017896541",
-    correoElectronico: "juan.gomez@example.com",
-  },
-];
 
 const TablaGestionDoctores = () => {
   const [filtros, setFiltros] = useState({
@@ -40,9 +8,28 @@ const TablaGestionDoctores = () => {
     nombres: "",
     apellidos: "",
   });
-
-  const [doctores, setDoctores] = useState(doctoresMock);
+  const [doctores, setDoctores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [doctorAEliminar, setDoctorAEliminar] = useState(null);
+  const [eliminando, setEliminando] = useState(false);
+
+  useEffect(() => {
+    const fetchDoctores = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get("/cuenta/doctores");
+        setDoctores(res.data || []);
+      } catch (err) {
+        setError("Error al cargar doctores");
+        setDoctores([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctores();
+  }, []);
 
   const handleChange = (e) => {
     setFiltros({
@@ -52,9 +39,9 @@ const TablaGestionDoctores = () => {
   };
 
   const doctoresFiltrados = doctores.filter((doc) => {
-    const matchIdentificacion = doc.identificacion.toLowerCase().includes(filtros.identificacion.toLowerCase());
-    const matchNombres = doc.nombres.toLowerCase().includes(filtros.nombres.toLowerCase());
-    const matchApellidos = doc.apellidos.toLowerCase().includes(filtros.apellidos.toLowerCase());
+    const matchIdentificacion = doc.identificacion?.toLowerCase().includes(filtros.identificacion.toLowerCase());
+    const matchNombres = doc.nombres?.toLowerCase().includes(filtros.nombres.toLowerCase());
+    const matchApellidos = doc.apellidos?.toLowerCase().includes(filtros.apellidos.toLowerCase());
 
     return (
       (!filtros.identificacion || matchIdentificacion) &&
@@ -69,6 +56,20 @@ const TablaGestionDoctores = () => {
 
   const cerrarModalEliminar = () => {
     setDoctorAEliminar(null);
+  };
+
+  const eliminarDoctor = async () => {
+    if (!doctorAEliminar) return;
+    setEliminando(true);
+    try {
+      await api.delete(`/cuenta/eliminar/${doctorAEliminar.id}`);
+      setDoctores((prev) => prev.filter((doc) => doc.id !== doctorAEliminar.id));
+      setDoctorAEliminar(null);
+    } catch (err) {
+      alert("Error al eliminar el doctor");
+    } finally {
+      setEliminando(false);
+    }
   };
 
   return (
@@ -111,55 +112,60 @@ const TablaGestionDoctores = () => {
 
       {/* Tabla */}
       <div className="rounded-lg overflow-hidden shadow-lg">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr className="bg-primary text-white text-sm uppercase text-center">
-              <th className="py-3 px-4">Identificación</th>
-              <th className="py-3 px-4">Nombres</th>
-              <th className="py-3 px-4">Apellidos</th>
-              <th className="py-3 px-4">Dirección</th>
-              <th className="py-3 px-4">Fecha de Nacimiento</th>
-              <th className="py-3 px-4">Teléfono</th>
-              <th className="py-3 px-4">Correo Electrónico</th>
-              <th className="py-3 px-4">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {doctoresFiltrados.length > 0 ? (
-              doctoresFiltrados.map((doctor, index) => (
-                <tr
-                  key={doctor.id}
-                  className={`text-center text-sm ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                    } hover:bg-gray-100`}
-                >
-                  <td className="py-2 px-4">{doctor.identificacion}</td>
-                  <td className="py-2 px-4">{doctor.nombres}</td>
-                  <td className="py-2 px-4">{doctor.apellidos}</td>
-                  <td className="py-2 px-4">{doctor.direccion}</td>
-                  <td className="py-2 px-4">{doctor.fechaNacimiento}</td>
-                  <td className="py-2 px-4">{doctor.telefono}</td>
-                  <td className="py-2 px-4">{doctor.correoElectronico}</td>
-                  <td className="py-2 px-4">
-                    <button
-                      onClick={() => abrirModalEliminar(doctor)}
-                      className="flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-200 mx-auto"
-                      title="Eliminar"
-                    >
-                      <Trash2 size={16} />
-                      <span className="hidden sm:inline">Eliminar</span>
-                    </button>
+        {loading ? (
+          <div className="text-center py-8 text-secondary">Cargando doctores...</div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">{error}</div>
+        ) : (
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="bg-primary text-white text-sm uppercase text-center">
+                <th className="py-3 px-4">Identificación</th>
+                <th className="py-3 px-4">Nombres</th>
+                <th className="py-3 px-4">Apellidos</th>
+                <th className="py-3 px-4">Dirección</th>
+                <th className="py-3 px-4">Fecha de Nacimiento</th>
+                <th className="py-3 px-4">Teléfono</th>
+                <th className="py-3 px-4">Correo Electrónico</th>
+                <th className="py-3 px-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {doctoresFiltrados.length > 0 ? (
+                doctoresFiltrados.map((doctor, index) => (
+                  <tr
+                    key={doctor.id}
+                    className={`text-center text-sm ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
+                  >
+                    <td className="py-2 px-4">{doctor.identificacion}</td>
+                    <td className="py-2 px-4">{doctor.nombres}</td>
+                    <td className="py-2 px-4">{doctor.apellidos}</td>
+                    <td className="py-2 px-4">{doctor.direccion}</td>
+                    <td className="py-2 px-4">{doctor.fechaNacimiento}</td>
+                    <td className="py-2 px-4">{doctor.telefono}</td>
+                    <td className="py-2 px-4">{doctor.correoElectronico}</td>
+                    <td className="py-2 px-4">
+                      <button
+                        onClick={() => abrirModalEliminar(doctor)}
+                        className="flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-200 mx-auto"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={16} />
+                        <span className="hidden sm:inline">Eliminar</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center py-6 text-secondary">
+                    No hay doctores para mostrar.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-center py-6 text-secondary">
-                  No hay doctores para mostrar.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Modal de confirmación */}
@@ -176,9 +182,11 @@ const TablaGestionDoctores = () => {
             </p>
             <div className="flex justify-center gap-4">
               <button
+                onClick={eliminarDoctor}
                 className="bg-red-600 text-white px-5 py-2 rounded hover:bg-red-700 transition"
+                disabled={eliminando}
               >
-                Sí, eliminar
+                {eliminando ? "Eliminando..." : "Sí, eliminar"}
               </button>
               <button
                 onClick={cerrarModalEliminar}
