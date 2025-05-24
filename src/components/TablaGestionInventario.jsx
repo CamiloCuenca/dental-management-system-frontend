@@ -77,7 +77,12 @@ const GestionInventario = () => {
         >
           <option value="">Todos</option>
           <option value="DISPONIBLE">DISPONIBLE</option>
-          <option value="NO_DISPONIBLE">NO DISPONIBLE</option>
+          <option value="AGOTADO">AGOTADO</option>
+          <option value="RESERVADO">RESERVADO</option>
+          <option value="VENCIDO">VENCIDO</option>
+          <option value="DAÑADO">DAÑADO</option>
+          <option value="ELIMINADO">ELIMINADO</option>
+          <option value="EN_REPOSICION">EN_REPOSICION</option>
         </select>
       </div>
 
