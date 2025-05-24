@@ -19,7 +19,7 @@ const InicioAdmin = () => {
           image={imagenGestionarPacientes}
           imageAlt="Gestionar Pacientes"
           title="Gestionar Pacientes"
-          description="Consulta, edita o elimina registros de pacientes."
+          description="Consulta registros de pacientes."
           buttonText="Gestionar Pacientes"
           redirectTo="/gestionPacientes"
         />
@@ -28,7 +28,7 @@ const InicioAdmin = () => {
             image={imagenGestionarInventario}
             imageAlt="Gestionar Inventario"
             title="Gestionar Inventario"
-            description="Controla los insumos y materiales médicos disponibles."
+            description="Controla los insumos y materiales odontológicos disponibles."
             buttonText="Gestionar Inventario"
             redirectTo="/gestionInventario"
           />
