@@ -83,7 +83,7 @@ const HomeDoctor = () => {
         <div className="min-h-screen bg-gray-50">
             <Header />
             
-            <div className="container mx-auto px-4 py-8">
+            <div className="mt-20 container mx-auto px-4 py-8">
                 {/* Sección de Bienvenida */}
                 <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
                     <h1 className="text-3xl font-bold text-secondary mb-2">

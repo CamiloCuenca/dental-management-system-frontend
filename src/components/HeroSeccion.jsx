@@ -16,7 +16,7 @@ const HeroSeccion = () => {
     return (
         // Sección principal con un fondo degradado y diseño flexible
         <div className="bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] 
-                        h-[350px] md:h-[450px] flex flex-col md:flex-row items-center px-6 md:px-12 py-10 md:py-20">
+                        h-[350px] md:h-[450px] flex flex-col md:flex-row items-center px-6 md:px-12 py-10 md:py-20 mt-15">
 
             {/* Imagen solo visible en pantallas medianas y grandes */}
             <div className="hidden md:block w-[30%] md:w-[25%] lg:w-[33.5%] flex justify-start md:ml-[-20px]">

@@ -76,7 +76,7 @@ const ContenidoPerfil = () => {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center px-4 py-10 bg-white">
+    <section className="mt-20 min-h-screen flex items-center justify-center px-4 py-10 bg-white">
         <div className="w-full max-w-4xl">
             <div className="bg-white/80 backdrop-blur-sm border-2 border-[var(--color-secondary)]/20 rounded-3xl shadow-xl shadow-[var(--color-secondary)]/10 p-8 sm:p-12 transform transition-all duration-300">
                 <div className="text-center mb-10">

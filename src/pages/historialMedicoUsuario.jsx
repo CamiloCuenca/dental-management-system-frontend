@@ -7,7 +7,7 @@ export default function HistorialMedico() {
         <div className="min-h-screen flex flex-col transition-all duration-300 ease-in-out bg-gradient-to-br from-blue-50 via-blue-50/80 to-blue-50">
             <Header />
             
-            <main className="container mx-auto px-6 py-10 space-y-16 flex-grow">
+            <main className="mt-20 container mx-auto px-6 py-10 space-y-16 flex-grow">
                 <section className="text-center space-y-2 animate-fade-in">
                     <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-secondary)]">
                         Historial Médico

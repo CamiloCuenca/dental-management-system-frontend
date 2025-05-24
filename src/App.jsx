@@ -24,6 +24,9 @@ import CitasNoAuthDoctor from './pages/CitasNoAuthDoctor';
 import GestionDoctores from './pages/GestionDoctores';
 import GestionPacientes from './pages/GestionPacientes';
 import GestionInventario from './pages/GestionInventario';
+import FormularioAgregarProductos from './components/FormularioAgregarProductos';
+import FormularioEditarProducto from './components/FormularioEditarProducto';
+
 
 function App() {
   return (
@@ -74,26 +77,26 @@ function App() {
         <Route path="/actualizarUsuario" element={<ActualizarUsuario />} />
 
         {/* Ruta para el dashboard del doctor */}
-        <Route path="/homeDoctor" element={<HomeDoctor/>} />
+        <Route path="/homeDoctor" element={<HomeDoctor />} />
 
         {/* Ruta para las citas del doctor */}
-        <Route path="/citasDoctor" element={<CitasDoctor/>} />
+        <Route path="/citasDoctor" element={<CitasDoctor />} />
 
         {/* Ruta para el formulario de historial médico */}
-        <Route path="/formularioHistorial" element={<FormularioHistorial/>} />
+        <Route path="/formularioHistorial" element={<FormularioHistorial />} />
 
         {/* Ruta para agendar cita pública */}
-        <Route path="/agendar-cita" element={<AgendarCitaPublico/>} />
+        <Route path="/agendar-cita" element={<AgendarCitaPublico />} />
 
         {/* Ruta para citas no autenticadas */}
-        <Route path="/citas-no-auth" element={<CitasNoAuth/>} />
+        <Route path="/citas-no-auth" element={<CitasNoAuth />} />
 
         {/* Ruta para el dashboard del administrador */}
-        <Route path="/homeAdmin" element={<HomeAdmin/>} />
+        <Route path="/homeAdmin" element={<HomeAdmin />} />
 
         {/* Nuevas rutas para citas no autenticadas */}
-        <Route path="/admin/citas-no-autenticadas" element={<CitasNoAuthAdmin/>} />
-        <Route path="/doctor/citas-no-autenticadas" element={<CitasNoAuthDoctor/>} />
+        <Route path="/admin/citas-no-autenticadas" element={<CitasNoAuthAdmin />} />
+        <Route path="/doctor/citas-no-autenticadas" element={<CitasNoAuthDoctor />} />
 
         {/* Ruta por defecto para manejar rutas no encontradas */}
         <Route path="*" element={<Home />} />
@@ -106,6 +109,13 @@ function App() {
 
         {/* Ruta para la gestion del doctores*/}
         <Route path="/GestionInventario" element={<GestionInventario />} />
+
+        {/* Ruta para el formulario para agregar productos */}
+        <Route path="/FormularioAgregarProductos" element={<FormularioAgregarProductos />} />
+
+        {/* Ruta para el formulario para editar productos */}
+        <Route path="/FormularioEditarProducto/:id" element={<FormularioEditarProducto />} />
+
       </Routes>
     </Router>
   )

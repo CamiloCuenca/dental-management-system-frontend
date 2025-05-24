@@ -48,8 +48,14 @@ const TablaGestionPacientes = () => {
   });
 
   return (
-    <div className="overflow-x-auto p-4 mt-16">
-      <h2 className="text-2xl font-bold mb-6 text-primary text-center">Gestión de Pacientes</h2>
+    <div className="overflow-x-auto p-4 mt-20">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl sm:text-4xl font-extrabold text-gray-800 tracking-tight bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-secondary)] bg-clip-text text-transparent">
+          Gestión de pacientes
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Consulta y administra la información personal de los pacientes de forma rápida y segura para brindar una atención médica organizada y eficiente.        </p>
+      </div>
 
       {/* Filtros */}
       <div className="flex flex-wrap justify-center gap-4 mb-8">
