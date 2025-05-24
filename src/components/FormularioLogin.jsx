@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import Swal from 'sweetalert2'; 
 import imagenLogin from '../assets/imagenLogin.png';
@@ -8,18 +8,6 @@ import api from "../services/api";
 import TokenService from '../services/tokenService';
 import { jwtDecode } from 'jwt-decode';
 
-
-/**
- * Componente de formulario para iniciar sesión en la plataforma.
- *
- * @component
- * @example
- * return (
- *   <FormularioLogin />
- * )
- *
- * @returns {JSX.Element} Formulario de inicio de sesión.
- */
 const FormularioLogin = () => {
     const [captchaValido, setCaptchaValido] = useState(false);
     const [usuario, setUsuario] = useState('');
@@ -31,22 +19,25 @@ const FormularioLogin = () => {
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
     const onChangeCaptcha = (value) => {
+        console.log("CAPTCHA validado:", value);
         setCaptchaValido(!!value);
     };
 
-    const handleUsuarioChange = (e) => {
-        setUsuario(e.target.value);
-    };
+    // ⚠️ SIMULACIÓN DE CAPTCHA para pruebas
+    useEffect(() => {
+        if (process.env.NODE_ENV === 'test' || window.Cypress) {
+            console.log("Simulación de CAPTCHA activada para pruebas");
+            setCaptchaValido(true);
+        }
+    }, []);
 
-    const handleContrasenaChange = (e) => {
-        setContrasena(e.target.value);
-    };
+    const handleUsuarioChange = (e) => setUsuario(e.target.value);
+    const handleContrasenaChange = (e) => setContrasena(e.target.value);
 
     const isButtonEnabled = usuario.trim() !== '' && contrasena.trim() !== '' && captchaValido;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         if (!isButtonEnabled) return;
 
         try {
@@ -72,7 +63,7 @@ const FormularioLogin = () => {
                     navigate("/");
                 } else if (rol === "DOCTOR") {
                     navigate("/homeDoctor");
-                } else if (rol == "ADMINISTRATOR") {
+                } else if (rol === "ADMINISTRATOR") {
                     navigate("/homeAdmin");
                 }
             });
@@ -84,7 +75,7 @@ const FormularioLogin = () => {
     };
 
     return (
-        <section className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[var(--color-primary)] from-10% via-[var(--color-secondary)] via-50% to-[var(--color-accent)] to-100%">
+        <section className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)]">
             <div className="flex shadow-2xl">
                 <div className="flex flex-col items-center justify-center text-center p-20 gap-8 bg-white rounded-2xl xl:rounded-tr-none xl:rounded-br-none relative">
                     <a href="/#">
@@ -95,7 +86,7 @@ const FormularioLogin = () => {
 
                     <h1 className="text-5xl font-bold text-[var(--color-secondary)]">Bienvenido</h1>
 
-                    {/* Campo de Usuario */}
+                    {/* Usuario */}
                     <div className="flex flex-col text-left gap-1 w-full">
                         <span className="text-lg">Usuario:</span>
                         <input
@@ -107,7 +98,7 @@ const FormularioLogin = () => {
                         />
                     </div>
 
-                    {/* Campo de Contraseña */}
+                    {/* Contraseña */}
                     <div className="flex flex-col text-left gap-1 w-full">
                         <span className="text-lg">Contraseña:</span>
                         <div className="relative w-full">
@@ -135,7 +126,7 @@ const FormularioLogin = () => {
                     {/* Mensaje de error */}
                     {mensajeError && <p className="text-red-500 text-sm">{mensajeError}</p>}
 
-                    {/* Botón de Ingresar */}
+                    {/* Botón de ingreso */}
                     <button
                         className={`px-10 py-2 text-2xl rounded-md text-white ${isButtonEnabled ? 'bg-[var(--color-primary)] hover:bg-[var(--color-secondary)]' : 'bg-gray-400 cursor-not-allowed'}`}
                         disabled={!isButtonEnabled}
