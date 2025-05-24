@@ -1,37 +1,5 @@
-import React, { useState } from "react";
-
-const PacientesMock = [
-  {
-    id: 1,
-    identificacion: "123456789",
-    nombres: "Carlos",
-    apellidos: "Pérez",
-    direccion: "Calle 123 #45-67",
-    fechaNacimiento: "1980-05-15",
-    telefono: "3111234567",
-    correoElectronico: "carlos.perez@example.com",
-  },
-  {
-    id: 2,
-    identificacion: "987654321",
-    nombres: "Ana María",
-    apellidos: "Rodríguez",
-    direccion: "Carrera 10 #20-30",
-    fechaNacimiento: "1975-10-08",
-    telefono: "3207654321",
-    correoElectronico: "ana.rodriguez@example.com",
-  },
-  {
-    id: 3,
-    identificacion: "456123789",
-    nombres: "Juan",
-    apellidos: "Gómez",
-    direccion: "Av. Siempre Viva 742",
-    fechaNacimiento: "1990-02-25",
-    telefono: "3017896541",
-    correoElectronico: "juan.gomez@example.com",
-  },
-];
+import React, { useState, useEffect } from "react";
+import api from "../services/api";
 
 const TablaGestionPacientes = () => {
   const [filtros, setFiltros] = useState({
@@ -39,6 +7,26 @@ const TablaGestionPacientes = () => {
     nombres: "",
     apellidos: "",
   });
+  const [pacientes, setPacientes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPacientes = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get("/cuenta/pacientes");
+        setPacientes(res.data || []);
+      } catch (err) {
+        setError("Error al cargar pacientes");
+        setPacientes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPacientes();
+  }, []);
 
   const handleChange = (e) => {
     setFiltros({
@@ -47,10 +35,10 @@ const TablaGestionPacientes = () => {
     });
   };
 
-  const pacientesFiltrados = PacientesMock.filter((paciente) => {
-    const matchIdentificacion = paciente.identificacion.toLowerCase().includes(filtros.identificacion.toLowerCase());
-    const matchNombres = paciente.nombres.toLowerCase().includes(filtros.nombres.toLowerCase());
-    const matchApellidos = paciente.apellidos.toLowerCase().includes(filtros.apellidos.toLowerCase());
+  const pacientesFiltrados = pacientes.filter((paciente) => {
+    const matchIdentificacion = paciente.identificacion?.toLowerCase().includes(filtros.identificacion.toLowerCase());
+    const matchNombres = paciente.nombres?.toLowerCase().includes(filtros.nombres.toLowerCase());
+    const matchApellidos = paciente.apellidos?.toLowerCase().includes(filtros.apellidos.toLowerCase());
 
     return (
       (!filtros.identificacion || matchIdentificacion) &&
@@ -93,43 +81,49 @@ const TablaGestionPacientes = () => {
 
       {/* Tabla */}
       <div className="rounded-lg overflow-hidden shadow-lg">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr className="bg-primary text-white text-sm uppercase text-center">
-              <th className="py-3 px-4">Identificación</th>
-              <th className="py-3 px-4">Nombres</th>
-              <th className="py-3 px-4">Apellidos</th>
-              <th className="py-3 px-4">Dirección</th>
-              <th className="py-3 px-4">Fecha de Nacimiento</th>
-              <th className="py-3 px-4">Teléfono</th>
-              <th className="py-3 px-4">Correo Electrónico</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pacientesFiltrados.length > 0 ? (
-              pacientesFiltrados.map((paciente, index) => (
-                <tr
-                  key={paciente.id}
-                  className={`text-center text-sm ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
-                >
-                  <td className="py-2 px-4">{paciente.identificacion}</td>
-                  <td className="py-2 px-4">{paciente.nombres}</td>
-                  <td className="py-2 px-4">{paciente.apellidos}</td>
-                  <td className="py-2 px-4">{paciente.direccion}</td>
-                  <td className="py-2 px-4">{paciente.fechaNacimiento}</td>
-                  <td className="py-2 px-4">{paciente.telefono}</td>
-                  <td className="py-2 px-4">{paciente.correoElectronico}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center py-6 text-secondary">
-                  No hay pacientes para mostrar.
-                </td>
+        {loading ? (
+          <div className="text-center py-8 text-secondary">Cargando pacientes...</div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">{error}</div>
+        ) : (
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="bg-primary text-white text-sm uppercase text-center">
+                <th className="py-3 px-4">Identificación</th>
+                <th className="py-3 px-4">Nombres</th>
+                <th className="py-3 px-4">Apellidos</th>
+                <th className="py-3 px-4">Dirección</th>
+                <th className="py-3 px-4">Fecha de Nacimiento</th>
+                <th className="py-3 px-4">Teléfono</th>
+                <th className="py-3 px-4">Correo Electrónico</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {pacientesFiltrados.length > 0 ? (
+                pacientesFiltrados.map((paciente, index) => (
+                  <tr
+                    key={paciente.id}
+                    className={`text-center text-sm ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
+                  >
+                    <td className="py-2 px-4">{paciente.identificacion}</td>
+                    <td className="py-2 px-4">{paciente.nombres}</td>
+                    <td className="py-2 px-4">{paciente.apellidos}</td>
+                    <td className="py-2 px-4">{paciente.direccion}</td>
+                    <td className="py-2 px-4">{paciente.fechaNacimiento}</td>
+                    <td className="py-2 px-4">{paciente.telefono}</td>
+                    <td className="py-2 px-4">{paciente.correoElectronico}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="text-center py-6 text-secondary">
+                    No hay pacientes para mostrar.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
