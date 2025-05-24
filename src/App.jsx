@@ -21,6 +21,9 @@ import FormularioHistorial from './components/FormularioHistorial';
 import HomeAdmin from './pages/HomeAdmin';
 import CitasNoAuthAdmin from './pages/CitasNoAuthAdmin';
 import CitasNoAuthDoctor from './pages/CitasNoAuthDoctor';
+import GestionDoctores from './pages/GestionDoctores';
+import GestionPacientes from './pages/GestionPacientes';
+import GestionInventario from './pages/GestionInventario';
 
 function App() {
   return (
@@ -94,6 +97,15 @@ function App() {
 
         {/* Ruta por defecto para manejar rutas no encontradas */}
         <Route path="*" element={<Home />} />
+
+        {/* Ruta para la gestion del doctores*/}
+        <Route path="/GestionDoctores" element={<GestionDoctores />} />
+
+        {/* Ruta para la gestion del pacientes*/}
+        <Route path="/GestionPacientes" element={<GestionPacientes />} />
+
+        {/* Ruta para la gestion del doctores*/}
+        <Route path="/GestionInventario" element={<GestionInventario />} />
       </Routes>
     </Router>
   )
