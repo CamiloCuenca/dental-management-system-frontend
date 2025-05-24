@@ -44,8 +44,15 @@ const GestionInventario = () => {
   };
 
   return (
-    <div className="overflow-x-auto p-4 mt-16">
-      <h2 className="text-3xl font-bold mb-6 text-primary text-center">Gestión de Inventario</h2>
+    <div className="overflow-x-auto p-4 mt-20">
+        <div className="text-center mb-8">
+        <h1 className="text-4xl sm:text-4xl font-extrabold text-gray-800 tracking-tight bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-secondary)] bg-clip-text text-transparent">
+          Gestión de Inventario
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Administra y controla los productos disponibles, sus cantidades mínimas, estados y fechas de vencimiento para mantener un inventario eficiente y actualizado.
+        </p>
+      </div>
 
       {/* Filtros */}
       <div className="flex flex-wrap justify-center gap-4 mb-4">
