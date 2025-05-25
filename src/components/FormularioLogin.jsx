@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import TokenService from '../services/tokenService';
 import { jwtDecode } from 'jwt-decode';
+import * as Sentry from '@sentry/react';  // <-- Importa Sentry
 
 const FormularioLogin = () => {
     const [captchaValido, setCaptchaValido] = useState(false);
@@ -23,7 +24,6 @@ const FormularioLogin = () => {
         setCaptchaValido(!!value);
     };
 
-    // ⚠️ SIMULACIÓN DE CAPTCHA para pruebas
     useEffect(() => {
         if (process.env.NODE_ENV === 'test' || window.Cypress) {
             console.log("Simulación de CAPTCHA activada para pruebas");
@@ -70,6 +70,7 @@ const FormularioLogin = () => {
 
         } catch (error) {
             console.error(error);
+            Sentry.captureException(error);  // <-- Aquí reportas el error a Sentry
             setMensajeError("Error al iniciar sesión. Verifique sus credenciales.");
         }
     };

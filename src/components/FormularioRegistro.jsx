@@ -4,11 +4,10 @@ import { FaArrowLeft, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import api from "../services/api"; // Cliente Axios configurado
 import Swal from 'sweetalert2';
 import { toast } from "react-hot-toast";
-
+import * as Sentry from "@sentry/react";  // <-- Import Sentry aquí
 
 const FormularioRegistro = () => {
 
-    // Estado para almacenar los valores del formulario
     const [formData, setFormData] = useState({
         identificacion: '',
         primerNombre: '',
@@ -20,35 +19,24 @@ const FormularioRegistro = () => {
         contraseña: '',
         confirmarContraseña: ''
     });
-    // Estado para validar si el captcha es válido
+
     const [captchaValido, setCaptchaValido] = useState(false);
-
-    // Estado para verificar si el formulario es válido
     const [formValido, setFormValido] = useState(false);
-
-    // Estados para mostrar/ocultar contraseñas
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-    // Estado para almacenar los errores de validación
     const [errors, setErrors] = useState({ correo: '', contraseña: '', confirmarContraseña: '' });
-
-    // Estado para mensajes de error o éxito
     const [mensaje, setMensaje] = useState('');
 
-    // Validar el formulario cada vez que cambien los datos o el captcha
     useEffect(() => {
         validateForm();
     }, [formData, captchaValido]);
 
-    // Maneja el cambio de valores en los inputs
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({ ...prevState, [name]: value }));
         validateField(name, value);
     };
 
-    // Validación de campos específicos
     const validateField = (name, value) => {
         let error = '';
 
@@ -71,69 +59,71 @@ const FormularioRegistro = () => {
         setErrors(prevErrors => ({ ...prevErrors, [name]: error }));
     };
 
-    // Verifica si todos los campos están completos y sin errores
     const validateForm = () => {
         const allFieldsFilled = Object.values(formData).every(value => value.trim() !== '');
         const noErrors = Object.values(errors).every(error => error === '');
         setFormValido(allFieldsFilled && noErrors && captchaValido);
     };
 
-    // Maneja el cambio de estado del captcha
     const onChangeCaptcha = (value) => {
         setCaptchaValido(!!value);
     };
 
-    // Manejo del envío del formulario
-   // Manejo del envío del formulario
-const handleSubmit = async (e) => {
-    e.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    if (!formValido) return;
+        if (!formValido) return;
 
-    const payload = {
-        idNumber: formData.identificacion,
-        name: formData.primerNombre,
-        lastName: formData.primerApellido,
-        phoneNumber: formData.telefono,
-        address: formData.direccion,
-        fechaNacimiento: formData.fechaNacimiento,
-        email: formData.correo,
-        password: formData.contraseña
-    };
+        const payload = {
+            idNumber: formData.identificacion,
+            name: formData.primerNombre,
+            lastName: formData.primerApellido,
+            phoneNumber: formData.telefono,
+            address: formData.direccion,
+            fechaNacimiento: formData.fechaNacimiento,
+            email: formData.correo,
+            password: formData.contraseña
+        };
 
-    try {
-        const response = await api.post('/cuenta/register', payload);
-        setMensaje(`Registro exitoso. ID: ${response.data}`);
-        Swal.fire({
-            icon: 'success',
-            title: 'Cuenta Creada',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Aceptar'
-        }).then(() => {
-            window.location.href = '/activarCuenta'; // Redirige después de aceptar
-        });
-    } catch (error) {
-        let errorMessage = 'Error al registrar la cuenta.'; // Mensaje por defecto
-        
-        if (error.response) {
-            // Manejo específico para error 409 (Conflicto - Usuario ya existe)
-            if (error.response.status === 409) {
-                errorMessage = 'El usuario con este número de identificación ya se encuentra registrado';
-            } else {
-                errorMessage = `Error: ${error.response.data}`;
+        try {
+            const response = await api.post('/cuenta/register', payload);
+            setMensaje(`Registro exitoso. ID: ${response.data}`);
+
+            // Evento de éxito para Sentry
+            Sentry.captureMessage(`Registro exitoso para usuario: ${payload.idNumber}`, 'info');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Cuenta Creada',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Aceptar'
+            }).then(() => {
+                window.location.href = '/activarCuenta'; // Redirige después de aceptar
+            });
+        } catch (error) {
+            let errorMessage = 'Error al registrar la cuenta.';
+            
+            if (error.response) {
+                if (error.response.status === 409) {
+                    errorMessage = 'El usuario con este número de identificación ya se encuentra registrado';
+                } else {
+                    errorMessage = `Error: ${error.response.data}`;
+                }
             }
+
+            // Captura el error en Sentry
+            Sentry.captureException(error);
+
+            setMensaje(errorMessage);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error en el registro',
+                text: errorMessage,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Entendido'
+            });
         }
-        
-        setMensaje(errorMessage);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error en el registro',
-            text: errorMessage,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Entendido'
-        });
-    }
-};
+    };
 
     return (
         <section className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] p-5 sm:p-10">
@@ -145,13 +135,11 @@ const handleSubmit = async (e) => {
                     <FaArrowLeft /> Volver
                 </button>
 
-
                 <h1 className="text-3xl sm:text-4xl font-bold text-center mb-2.5 text-[var(--color-secondary)]">Crear una cuenta</h1>
                 <h4 className="text-lg sm:text-xl font-bold text-center mb-2.5 text-[var(--color-secondary)]">Es rápido y sencillo</h4>
                 <hr className="border-t border-gray-600 my-4" />
 
                 <form onSubmit={handleSubmit}>
-                    {/* Aquí van los campos del formulario con validaciones */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {[
                             { label: "Número de identificación*:", type: "number", name: "identificacion", placeholder: "Ingrese su número de identificación" },
@@ -204,7 +192,6 @@ const handleSubmit = async (e) => {
                     </div>
 
                     <div className='flex items-center justify-center mt-5'>
-                        {/* <ReCAPTCHA sitekey='6LewT-0qAAAAAPjdrCwXd3Ofu4ZT1565ziPLMeyz' onChange={onChangeCaptcha} />*/}
                         <ReCAPTCHA sitekey='6LdROu8qAAAAAG6p4e5sHgs8mkvuRfJUnDsursmm' onChange={onChangeCaptcha} />
                     </div>
 
@@ -216,7 +203,6 @@ const handleSubmit = async (e) => {
                         </button>
                     </div>
                 </form>
-
             </div>
         </section>
     );
